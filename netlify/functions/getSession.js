@@ -1,6 +1,6 @@
-const { Redis } = require('@upstash/redis');
+import { Redis } from '@upstash/redis';
 
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',

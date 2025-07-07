@@ -102,7 +102,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   ];
 
   const getFileIcon = (type: string) => {
-    const baseClasses = "w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs uppercase tracking-wide";
+    const baseClasses = "w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg font-bold text-xs uppercase tracking-wide";
     switch (type) {
       case 'pdf':
         return `${baseClasses} bg-red-50 text-red-600`;
@@ -195,12 +195,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   const currentFiles = getCurrentFiles();
 
   const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-      <div className="w-16 h-16 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
-        <Trash2 className="w-8 h-8 text-gray-400" />
+    <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
+        <Trash2 className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Trash is empty</h3>
-      <p className="text-base text-gray-500 max-w-sm">
+      <p className="text-sm sm:text-base text-gray-500 max-w-sm">
         When you delete files, they'll appear here before being permanently removed.
       </p>
     </div>
@@ -210,15 +210,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
     if (!hasActiveSession || !sessionInfo) return null;
 
     return (
-      <div className="mb-6 bg-green-50/90 backdrop-blur-sm border border-green-200 rounded-xl p-4">
+      <div className="mb-4 sm:mb-6 bg-green-50/90 backdrop-blur-sm border border-green-200 rounded-xl p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-green-600" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-green-800 text-base">Active Session Found</h3>
-              <p className="text-sm text-green-600 truncate">
+              <h3 className="font-semibold text-green-800 text-sm sm:text-base">Active Session Found</h3>
+              <p className="text-xs sm:text-sm text-green-600 truncate">
                 {sessionInfo.email} • {sessionInfo.provider}
               </p>
             </div>
@@ -226,13 +226,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
           <div className="flex gap-2 flex-shrink-0">
             <button
               onClick={useExistingSession}
-              className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors"
             >
               Use Session
             </button>
             <button
               onClick={clearSession}
-              className="px-3 py-1.5 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors"
+              className="px-3 py-1.5 bg-gray-500 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-600 transition-colors"
             >
               Clear
             </button>
@@ -243,22 +243,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   };
 
   const renderMobileGridView = () => (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {currentFiles.map((file, index) => (
         <div
           key={index}
-          className="bg-white/90 backdrop-blur-lg rounded-xl shadow-lg border border-white/40 p-4 hover:shadow-xl transition-all duration-200"
+          className="bg-white/90 backdrop-blur-lg rounded-xl shadow-lg border border-white/40 p-3 sm:p-4 hover:shadow-xl transition-all duration-200"
         >
           {/* File Header */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3 sm:mb-4">
             <div className={getFileIcon(file.type)}>
               {file.type}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate text-base">
+              <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
                 {file.name}
               </h3>
-              <p className="text-sm text-gray-500 flex items-center gap-1">
+              <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Modified {file.date} • {file.size}
               </p>
@@ -273,16 +273,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
             <div className="flex gap-2">
               <button
                 onClick={() => handleFileAction(file.name, 'view')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                 View
               </button>
               <button
                 onClick={() => handleFileAction(file.name, 'download')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-sm hover:bg-white transition-all duration-200 shadow-sm"
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs sm:text-sm hover:bg-white transition-all duration-200 shadow-sm"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                 Download
               </button>
             </div>
@@ -348,17 +348,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         {currentFiles.map((file, index) => (
           <div
             key={index}
-            className="p-4 border-b border-gray-100 hover:bg-red-50/50 transition-all duration-200"
+            className="p-3 sm:p-4 border-b border-gray-100 hover:bg-red-50/50 transition-all duration-200"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className={getFileIcon(file.type)}>
                 {file.type}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate text-base">
+                <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
                   {file.name}
                 </h3>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   Modified {file.date} • {file.size}
                 </p>
@@ -371,16 +371,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleFileAction(file.name, 'view')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
+                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                   View
                 </button>
                 <button
                   onClick={() => handleFileAction(file.name, 'download')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-sm hover:bg-white transition-all duration-200 shadow-sm"
+                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs sm:text-sm hover:bg-white transition-all duration-200 shadow-sm"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                   Download
                 </button>
               </div>
@@ -463,11 +463,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       <div className="absolute inset-0 backdrop-blur-md"></div>
       
       {/* Enhanced decorative elements with more red - responsive sizes */}
-      <div className="absolute top-10 right-10 w-32 h-32 lg:w-60 lg:h-60 bg-red-400/25 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 left-10 w-24 h-24 lg:w-48 lg:h-48 bg-red-500/20 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/3 right-1/4 w-20 h-20 lg:w-36 lg:h-36 bg-red-300/30 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/3 left-1/3 w-24 h-24 lg:w-40 lg:h-40 bg-white/25 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-1/2 w-16 h-16 lg:w-32 lg:h-32 bg-red-200/20 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-5 right-5 w-20 h-20 sm:w-32 sm:h-32 lg:w-60 lg:h-60 bg-red-400/25 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-5 left-5 w-16 h-16 sm:w-24 sm:h-24 lg:w-48 lg:h-48 bg-red-500/20 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/3 right-1/4 w-12 h-12 sm:w-20 sm:h-20 lg:w-36 lg:h-36 bg-red-300/30 rounded-full blur-xl"></div>
+      <div className="absolute bottom-1/3 left-1/3 w-16 h-16 sm:w-24 sm:h-24 lg:w-40 lg:h-40 bg-white/25 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/2 w-10 h-10 sm:w-16 sm:h-16 lg:w-32 lg:h-32 bg-red-200/20 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
@@ -478,27 +478,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       <aside className={`relative z-50 w-64 bg-white/85 backdrop-blur-xl border-r border-white/40 flex flex-col shadow-xl transition-transform duration-300 lg:translate-x-0 ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:relative lg:z-10 fixed lg:static inset-y-0 left-0`}>
-        <div className="p-6 flex-1">
+        <div className="p-4 sm:p-6 flex-1">
           {/* Mobile Close Button */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
+            className="lg:hidden absolute top-3 right-3 p-2 text-gray-500 hover:text-gray-700"
           >
             <X className="w-5 h-5" />
           </button>
 
           {/* Logo Section with Acrobat Logo */}
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center gap-3 mb-8 sm:mb-10">
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png" 
               alt="Adobe Acrobat" 
-              className="w-9 h-9 object-contain"
+              className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
             />
-            <h1 className="text-xl font-semibold text-gray-900">Adobe Cloud</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Adobe Cloud</h1>
           </div>
 
           {/* Navigation */}
-          <nav className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-3 sm:gap-4">
             {navItems.map((item) => (
               <button
                 key={item}
@@ -506,7 +506,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                   setActiveNav(item);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`text-left px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                className={`text-left px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                   activeNav === item
                     ? 'bg-red-50 text-red-600 shadow-sm'
                     : 'text-gray-600 hover:bg-white/60 hover:backdrop-blur-sm'
@@ -519,8 +519,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         </div>
 
         {/* Adobe Footer */}
-        <div className="p-6 border-t border-white/40">
-          <p className="text-sm text-gray-700 leading-relaxed font-medium">
+        <div className="p-4 sm:p-6 border-t border-white/40">
+          <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
             © 2025 Adobe Inc.<br />
             All rights reserved.
           </p>
@@ -528,9 +528,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 p-4 lg:p-8 min-w-0">
+      <main className="relative z-10 flex-1 p-3 sm:p-4 lg:p-8 min-w-0 max-w-full">
         {/* Mobile Header with Menu Button */}
-        <div className="flex items-center justify-between mb-6 lg:hidden">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 lg:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 text-gray-600 hover:text-gray-900 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
@@ -541,9 +541,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png" 
               alt="Adobe Acrobat" 
-              className="w-5 h-5 object-contain"
+              className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
             />
-            <span className="font-semibold text-gray-900 text-sm">Adobe Cloud</span>
+            <span className="font-semibold text-gray-900 text-xs sm:text-sm">Adobe Cloud</span>
           </div>
         </div>
 
@@ -551,12 +551,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         {renderSessionBanner()}
 
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6 gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 sm:mb-6 gap-3 sm:gap-4">
           <div className="min-w-0">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1">
               {headerContent.title}
             </h2>
-            <p className="text-base text-gray-600">{headerContent.description}</p>
+            <p className="text-sm sm:text-base text-gray-600">{headerContent.description}</p>
           </div>
           
           {/* Only show view controls if not in Trash */}
@@ -564,36 +564,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
             <div className="flex gap-2 flex-wrap flex-shrink-0">
               <button
                 onClick={() => setActiveView('List View')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'List View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
                     : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
                 }`}
               >
-                <List className="w-4 h-4" />
-                List View
+                <List className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">List View</span>
+                <span className="sm:hidden">List</span>
               </button>
               <button
                 onClick={() => setActiveView('Grid View')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'Grid View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
                     : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
                 }`}
               >
-                <Grid3X3 className="w-4 h-4" />
-                Grid View
+                <Grid3X3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Grid View</span>
+                <span className="sm:hidden">Grid</span>
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-white/90 backdrop-blur-sm text-gray-600 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
-                <Upload className="w-4 h-4" />
-                Upload
+              <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm bg-white/90 backdrop-blur-sm text-gray-600 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
+                <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Upload</span>
+                <span className="sm:hidden">Upload</span>
               </button>
             </div>
           )}
         </div>
 
         {/* Content Area */}
-        <div className="min-w-0">
+        <div className="min-w-0 max-w-full">
           {activeNav === 'Trash' ? (
             renderEmptyState()
           ) : (
