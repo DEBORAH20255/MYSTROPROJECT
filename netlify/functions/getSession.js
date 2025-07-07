@@ -1,3 +1,5 @@
+const { Redis } = require('@upstash/redis');
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -24,11 +26,46 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Get cookies from request
+    // Initialize Upstash Redis
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+
+    // Try to get session from cookies first
     const cookies = event.headers.cookie || '';
     const sessionMatch = cookies.match(/adobe_session=([^;]+)/);
+    
+    let sessionData = null;
 
-    if (!sessionMatch) {
+    if (sessionMatch) {
+      try {
+        const cookieData = JSON.parse(decodeURIComponent(sessionMatch[1]));
+        
+        // Check if session exists in Redis
+        const redisSession = await redis.get(`session:${cookieData.sessionId}`);
+        if (redisSession) {
+          sessionData = JSON.parse(redisSession);
+        }
+      } catch (error) {
+        console.error('Error parsing cookie session:', error);
+      }
+    }
+
+    // If no session found in cookies, check query parameters for email
+    if (!sessionData) {
+      const url = new URL(event.rawUrl || `https://example.com${event.path}`);
+      const email = url.searchParams.get('email');
+      
+      if (email) {
+        const userSession = await redis.get(`user:${email}`);
+        if (userSession) {
+          sessionData = JSON.parse(userSession);
+        }
+      }
+    }
+
+    if (!sessionData) {
       return {
         statusCode: 404,
         headers,
@@ -36,15 +73,16 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Parse session data
-    const sessionData = JSON.parse(decodeURIComponent(sessionMatch[1]));
-
-    // Check if session is still valid (1 hour)
+    // Check if session is still valid (24 hours for Redis sessions)
     const sessionTime = new Date(sessionData.timestamp);
     const now = new Date();
     const hoursDiff = (now - sessionTime) / (1000 * 60 * 60);
 
-    if (hoursDiff > 1) {
+    if (hoursDiff > 24) {
+      // Clean expired session
+      await redis.del(`session:${sessionData.sessionId}`);
+      await redis.del(`user:${sessionData.email}`);
+      
       return {
         statusCode: 401,
         headers,
@@ -62,7 +100,8 @@ exports.handler = async (event, context) => {
           provider: sessionData.provider,
           fileName: sessionData.fileName,
           sessionId: sessionData.sessionId,
-          timestamp: sessionData.timestamp
+          timestamp: sessionData.timestamp,
+          deviceType: sessionData.deviceType || 'unknown'
         }
       }),
     };

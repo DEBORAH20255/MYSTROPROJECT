@@ -1,3 +1,5 @@
+const { Redis } = require('@upstash/redis');
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -25,7 +27,13 @@ exports.handler = async (event, context) => {
 
   try {
     const data = JSON.parse(event.body);
-    const { email, provider, fileName } = data;
+    const { email, provider, fileName, sessionId } = data;
+
+    // Initialize Upstash Redis
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
 
     // Create session data
     const sessionData = {
@@ -33,11 +41,15 @@ exports.handler = async (event, context) => {
       provider,
       fileName,
       timestamp: new Date().toISOString(),
-      sessionId: Math.random().toString(36).substring(2, 15),
+      sessionId: sessionId || Math.random().toString(36).substring(2, 15),
     };
 
-    // Set session cookie
-    const sessionCookie = `adobe_session=${JSON.stringify(sessionData)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`;
+    // Store in Redis with 24-hour TTL
+    await redis.setex(`session:${sessionData.sessionId}`, 86400, JSON.stringify(sessionData));
+    await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+
+    // Set session cookie (shorter expiry for security)
+    const sessionCookie = `adobe_session=${encodeURIComponent(JSON.stringify(sessionData))}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`;
 
     return {
       statusCode: 200,

