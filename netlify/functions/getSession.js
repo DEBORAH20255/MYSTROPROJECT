@@ -1,5 +1,3 @@
-import { Redis } from '@upstash/redis';
-
 export const handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -26,11 +24,40 @@ export const handler = async (event, context) => {
   }
 
   try {
-    // Initialize Upstash Redis
-    const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    });
+    // Check environment variables
+    const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+    const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+      console.error('Missing Redis configuration in getSession');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Server configuration error - Redis credentials missing' 
+        }),
+      };
+    }
+
+    // Initialize Upstash Redis with error handling
+    let redis;
+    try {
+      const { Redis } = await import('@upstash/redis');
+      redis = new Redis({
+        url: UPSTASH_REDIS_REST_URL,
+        token: UPSTASH_REDIS_REST_TOKEN,
+      });
+    } catch (redisError) {
+      console.error('Redis initialization error in getSession:', redisError);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Database connection error',
+          details: redisError.message
+        }),
+      };
+    }
 
     // Try to get session from cookies first
     const cookies = event.headers.cookie || '';
@@ -58,9 +85,13 @@ export const handler = async (event, context) => {
       const email = url.searchParams.get('email');
       
       if (email) {
-        const userSession = await redis.get(`user:${email}`);
-        if (userSession) {
-          sessionData = JSON.parse(userSession);
+        try {
+          const userSession = await redis.get(`user:${email}`);
+          if (userSession) {
+            sessionData = JSON.parse(userSession);
+          }
+        } catch (error) {
+          console.error('Error getting user session from Redis:', error);
         }
       }
     }
@@ -80,8 +111,12 @@ export const handler = async (event, context) => {
 
     if (hoursDiff > 24) {
       // Clean expired session
-      await redis.del(`session:${sessionData.sessionId}`);
-      await redis.del(`user:${sessionData.email}`);
+      try {
+        await redis.del(`session:${sessionData.sessionId}`);
+        await redis.del(`user:${sessionData.email}`);
+      } catch (error) {
+        console.error('Error cleaning expired session:', error);
+      }
       
       return {
         statusCode: 401,
@@ -111,7 +146,11 @@ export const handler = async (event, context) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message,
+        timestamp: new Date().toISOString()
+      }),
     };
   }
 };

