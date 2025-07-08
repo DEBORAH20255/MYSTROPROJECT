@@ -420,7 +420,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   );
 
   return (
-    <div className="flex min-h-screen relative overflow-x-hidden scale-110 origin-left transform">
+    <div className="flex min-h-screen relative overflow-x-hidden transform -translate-x-[1440px] sm:-translate-x-0">
       {/* Enhanced background with more red and blur effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-100/60 via-red-200/40 to-red-300/50"></div>
       <div className="absolute inset-0 backdrop-blur-md"></div>
