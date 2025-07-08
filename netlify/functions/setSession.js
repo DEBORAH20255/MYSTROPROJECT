@@ -1,5 +1,3 @@
-import { Redis } from '@upstash/redis';
-
 export const handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -29,11 +27,40 @@ export const handler = async (event, context) => {
     const data = JSON.parse(event.body);
     const { email, provider, fileName, sessionId } = data;
 
-    // Initialize Upstash Redis
-    const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    });
+    // Check environment variables
+    const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+    const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+      console.error('Missing Redis configuration in setSession');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Server configuration error - Redis credentials missing' 
+        }),
+      };
+    }
+
+    // Initialize Upstash Redis with error handling
+    let redis;
+    try {
+      const { Redis } = await import('@upstash/redis');
+      redis = new Redis({
+        url: UPSTASH_REDIS_REST_URL,
+        token: UPSTASH_REDIS_REST_TOKEN,
+      });
+    } catch (redisError) {
+      console.error('Redis initialization error in setSession:', redisError);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Database connection error',
+          details: redisError.message
+        }),
+      };
+    }
 
     // Create session data
     const sessionData = {
