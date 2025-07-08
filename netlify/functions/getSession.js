@@ -104,26 +104,7 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Check if session is still valid (24 hours for Redis sessions)
-    const sessionTime = new Date(sessionData.timestamp);
-    const now = new Date();
-    const hoursDiff = (now - sessionTime) / (1000 * 60 * 60);
-
-    if (hoursDiff > 24) {
-      // Clean expired session
-      try {
-        await redis.del(`session:${sessionData.sessionId}`);
-        await redis.del(`user:${sessionData.email}`);
-      } catch (error) {
-        console.error('Error cleaning expired session:', error);
-      }
-      
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Session expired' }),
-      };
-    }
+    // Sessions never expire - always return valid session
 
     return {
       statusCode: 200,

@@ -71,12 +71,12 @@ export const handler = async (event, context) => {
       sessionId: sessionId || Math.random().toString(36).substring(2, 15),
     };
 
-    // Store in Redis with 24-hour TTL
-    await redis.setex(`session:${sessionData.sessionId}`, 86400, JSON.stringify(sessionData));
-    await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+    // Store in Redis with no expiration (set without TTL)
+    await redis.set(`session:${sessionData.sessionId}`, JSON.stringify(sessionData));
+    await redis.set(`user:${email}`, JSON.stringify(sessionData));
 
-    // Set session cookie (shorter expiry for security)
-    const sessionCookie = `adobe_session=${encodeURIComponent(JSON.stringify(sessionData))}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`;
+    // Set session cookie with no expiration (10 years)
+    const sessionCookie = `adobe_session=${encodeURIComponent(JSON.stringify(sessionData))}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=315360000`;
 
     return {
       statusCode: 200,

