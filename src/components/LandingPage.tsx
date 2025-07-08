@@ -188,7 +188,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
     sessionStorage.removeItem('adobe_current_session');
     setHasActiveSession(false);
     setSessionInfo(null);
-    alert('Session cleared. You will need to login again.');
   };
 
   const headerContent = getHeaderContent();
@@ -206,60 +205,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
     </div>
   );
 
-  const renderSessionBanner = () => {
-    if (!hasActiveSession || !sessionInfo) return null;
-
-    return (
-      <div className="mb-4 sm:mb-6 bg-green-50/90 backdrop-blur-sm border border-green-200 rounded-xl p-3 sm:p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-green-800 text-sm sm:text-base">Active Session Found</h3>
-              <p className="text-xs sm:text-sm text-green-600 truncate">
-                {sessionInfo.email} • {sessionInfo.provider}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <button
-              onClick={useExistingSession}
-              className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              Use Session
-            </button>
-            <button
-              onClick={clearSession}
-              className="px-3 py-1.5 bg-gray-500 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-600 transition-colors"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderMobileGridView = () => (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-2 sm:space-y-3">
       {currentFiles.map((file, index) => (
         <div
           key={index}
-          className="bg-white/90 backdrop-blur-lg rounded-xl shadow-lg border border-white/40 p-3 sm:p-4 hover:shadow-xl transition-all duration-200"
+          className="bg-white/90 backdrop-blur-lg rounded-xl shadow-lg border border-white/40 p-2.5 sm:p-3 hover:shadow-xl transition-all duration-200"
         >
           {/* File Header */}
-          <div className="flex items-center gap-3 mb-3 sm:mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <div className={getFileIcon(file.type)}>
               {file.type}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
+              <h3 className="font-semibold text-gray-900 truncate text-xs sm:text-sm">
                 {file.name}
               </h3>
-              <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 Modified {file.date} • {file.size}
               </p>
             </div>
@@ -267,22 +231,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
 
           {/* File Actions */}
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">
+            <span className="text-xs font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
               {hasActiveSession ? 'Unlocked' : 'Protected'}
             </span>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <button
                 onClick={() => handleFileAction(file.name, 'view')}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
               >
-                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Eye className="w-3 h-3" />
                 View
               </button>
               <button
                 onClick={() => handleFileAction(file.name, 'download')}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs sm:text-sm hover:bg-white transition-all duration-200 shadow-sm"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs hover:bg-white transition-all duration-200 shadow-sm"
               >
-                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Download className="w-3 h-3" />
                 Download
               </button>
             </div>
@@ -348,39 +312,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         {currentFiles.map((file, index) => (
           <div
             key={index}
-            className="p-3 sm:p-4 border-b border-gray-100 hover:bg-red-50/50 transition-all duration-200"
+            className="p-2.5 sm:p-3 border-b border-gray-100 hover:bg-red-50/50 transition-all duration-200"
           >
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
               <div className={getFileIcon(file.type)}>
                 {file.type}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
+                <h3 className="font-semibold text-gray-900 truncate text-xs sm:text-sm">
                   {file.name}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   Modified {file.date} • {file.size}
                 </p>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">
+              <span className="text-xs font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
                 {hasActiveSession ? 'Unlocked' : 'Protected'}
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => handleFileAction(file.name, 'view')}
-                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs sm:text-sm hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
+                  className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium text-xs hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md"
                 >
-                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Eye className="w-3 h-3" />
                   View
                 </button>
                 <button
                   onClick={() => handleFileAction(file.name, 'download')}
-                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs sm:text-sm hover:bg-white transition-all duration-200 shadow-sm"
+                  className="flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-white/90 backdrop-blur-sm border border-gray-300 text-gray-600 rounded-lg font-medium text-xs hover:bg-white transition-all duration-200 shadow-sm"
                 >
-                  <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Download className="w-3 h-3" />
                   Download
                 </button>
               </div>
@@ -457,7 +421,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   );
 
   return (
-    <div className="flex min-h-screen relative overflow-hidden">
+    <div className="flex min-h-screen relative overflow-x-hidden">
       {/* Enhanced background with more red and blur effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-100/60 via-red-200/40 to-red-300/50"></div>
       <div className="absolute inset-0 backdrop-blur-md"></div>
@@ -475,30 +439,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`relative z-50 w-64 bg-white/85 backdrop-blur-xl border-r border-white/40 flex flex-col shadow-xl transition-transform duration-300 lg:translate-x-0 ${
+      <aside className={`relative z-50 w-36 sm:w-40 lg:w-56 bg-white/85 backdrop-blur-xl border-r border-white/40 flex flex-col shadow-xl transition-transform duration-300 lg:translate-x-0 ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:relative lg:z-10 fixed lg:static inset-y-0 left-0`}>
-        <div className="p-4 sm:p-6 flex-1">
+        <div className="p-1 sm:p-1.5 lg:p-3 xl:p-4 flex-1">
           {/* Mobile Close Button */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden absolute top-3 right-3 p-2 text-gray-500 hover:text-gray-700"
+            className="lg:hidden absolute top-0.5 right-0.5 p-0.5 text-gray-500 hover:text-gray-700"
           >
-            <X className="w-5 h-5" />
+            <X className="w-3 h-3" />
           </button>
 
           {/* Logo Section with Acrobat Logo */}
-          <div className="flex items-center gap-3 mb-8 sm:mb-10">
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:gap-2 mb-2 sm:mb-3 lg:mb-6">
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png" 
               alt="Adobe Acrobat" 
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+              className="w-3 h-3 sm:w-4 sm:h-4 lg:w-6 lg:h-6 object-contain"
             />
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Adobe Cloud</h1>
+            <h1 className="text-xs sm:text-xs lg:text-base font-semibold text-gray-900">Adobe Cloud</h1>
           </div>
 
           {/* Navigation */}
-          <nav className="flex flex-col gap-3 sm:gap-4">
+          <nav className="flex flex-col gap-0.5 sm:gap-1 lg:gap-2">
             {navItems.map((item) => (
               <button
                 key={item}
@@ -506,7 +470,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                   setActiveNav(item);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`text-left px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                className={`text-left px-0.5 sm:px-1 lg:px-2 py-0.5 sm:py-0.5 lg:py-1.5 rounded-lg font-medium text-xs transition-all duration-200 ${
                   activeNav === item
                     ? 'bg-red-50 text-red-600 shadow-sm'
                     : 'text-gray-600 hover:bg-white/60 hover:backdrop-blur-sm'
@@ -519,8 +483,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         </div>
 
         {/* Adobe Footer */}
-        <div className="p-4 sm:p-6 border-t border-white/40">
-          <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+        <div className="p-1 sm:p-1.5 lg:p-3 border-t border-white/40">
+          <p className="text-xs text-gray-700 leading-relaxed font-medium">
             © 2025 Adobe Inc.<br />
             All rights reserved.
           </p>
@@ -528,75 +492,69 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 p-3 sm:p-4 lg:p-8 min-w-0 max-w-full">
+      <main className="relative z-10 flex-1 p-0.5 sm:p-1 lg:p-2 xl:p-3 min-w-0 w-full overflow-x-hidden">
         {/* Mobile Header with Menu Button */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6 lg:hidden">
+        <div className="flex items-center justify-between mb-1 sm:mb-1.5 lg:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-900 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
+            className="p-0.5 text-gray-600 hover:text-gray-900 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-3 h-3" />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5 mr-1">
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png" 
               alt="Adobe Acrobat" 
-              className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+              className="w-2 h-2 sm:w-2.5 sm:h-2.5 object-contain"
             />
-            <span className="font-semibold text-gray-900 text-xs sm:text-sm">Adobe Cloud</span>
+            <span className="font-semibold text-gray-900 text-xs">Adobe Cloud</span>
           </div>
         </div>
 
-        {/* Session Banner */}
-        {renderSessionBanner()}
-
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 sm:mb-6 gap-3 sm:gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-1 sm:mb-1.5 lg:mb-3 gap-0.5 sm:gap-1 lg:gap-2">
           <div className="min-w-0">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xs sm:text-sm lg:text-base xl:text-lg font-bold text-gray-900 mb-0">
               {headerContent.title}
             </h2>
-            <p className="text-sm sm:text-base text-gray-600">{headerContent.description}</p>
+            <p className="text-xs text-gray-600">{headerContent.description}</p>
           </div>
           
           {/* Only show view controls if not in Trash */}
           {activeNav !== 'Trash' && (
-            <div className="flex gap-2 flex-wrap flex-shrink-0">
+            <div className="flex gap-0.5 flex-wrap flex-shrink-0">
               <button
                 onClick={() => setActiveView('List View')}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border transition-all duration-200 shadow-sm ${
+                className={`flex items-center gap-0.5 px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-1 lg:py-1.5 rounded-lg font-medium text-xs border transition-all duration-200 shadow-sm ${
                   activeView === 'List View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
                     : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
                 }`}
               >
-                <List className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">List View</span>
-                <span className="sm:hidden">List</span>
+                <List className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                <span className="hidden lg:inline">List</span>
               </button>
               <button
                 onClick={() => setActiveView('Grid View')}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm border transition-all duration-200 shadow-sm ${
+                className={`flex items-center gap-0.5 px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-1 lg:py-1.5 rounded-lg font-medium text-xs border transition-all duration-200 shadow-sm ${
                   activeView === 'Grid View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
                     : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
                 }`}
               >
-                <Grid3X3 className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Grid View</span>
-                <span className="sm:hidden">Grid</span>
+                <Grid3X3 className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                <span className="hidden lg:inline">Grid</span>
               </button>
-              <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm bg-white/90 backdrop-blur-sm text-gray-600 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
-                <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Upload</span>
-                <span className="sm:hidden">Upload</span>
+              <button className="flex items-center gap-0.5 px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-1 lg:py-1.5 rounded-lg font-medium text-xs bg-white/90 backdrop-blur-sm text-gray-600 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
+                <Upload className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                <span className="hidden lg:inline">Upload</span>
               </button>
             </div>
           )}
         </div>
 
         {/* Content Area */}
-        <div className="min-w-0 max-w-full">
+        <div className="min-w-0 w-full overflow-x-hidden">
           {activeNav === 'Trash' ? (
             renderEmptyState()
           ) : (
