@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useScreenSize } from './hooks/useScreenSize';
-import MobileLandingPage from './components/mobile/MobileLandingPage';
-import MobileLoginPage from './components/mobile/MobileLoginPage';
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
 
 function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'login'>('landing');
@@ -21,12 +21,13 @@ function App() {
     console.log('Login successful, session data:', sessionData);
   };
 
+  // Always render desktop version - the components themselves handle responsiveness
   return (
     <div className="min-h-screen">
       {currentView === 'landing' ? (
-        <MobileLandingPage onFileAction={handleFileAction} />
+        <LandingPage onFileAction={handleFileAction} />
       ) : (
-        <MobileLoginPage 
+        <LoginPage 
           fileName={selectedFile} 
           onBack={handleBackToLanding}
           onLoginSuccess={handleLoginSuccess}
