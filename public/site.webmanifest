@@ -1,19 +1,14 @@
 {
-  "name": "Adobe Cloud",
+  "name": "Adobe Cloud - Protected Files",
   "short_name": "Adobe Cloud",
   "icons": [
     {
       "src": "/acrobat-logo.png",
       "sizes": "192x192",
       "type": "image/png"
-    },
-    {
-      "src": "/acrobat-logo.png",
-      "sizes": "512x512",
-      "type": "image/png"
     }
   ],
-  "theme_color": "#dc2626",
+  "theme_color": "#F40F02",
   "background_color": "#ffffff",
   "display": "standalone"
 }

