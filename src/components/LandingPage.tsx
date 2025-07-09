@@ -203,7 +203,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onFileAction }) => {
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-20 h-20 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 shadow-lg">
-        <Trash2 className="w-10 h-10 text-gray-400" />
+        <Trash2 className="w-10 h-10 text-gray-700" />
       </div>
       <h3 className="text-xl font-semibold text-white mb-3">Trash is empty</h3>
       <p className="text-base text-gray-300 max-w-sm">
